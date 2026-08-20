@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#087f5b">
+<meta name="description" content="Saad Traders - Grocery and daily needs ordering">
+<title>Saad Traders — Online Store</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#087f5b;
+  --green2:#10a36f;
+  --dark:#10251f;
+  --light:#f5f7f6;
+  --white:#fff;
+  --muted:#68756f;
+  --border:#e4e9e6;
+  --danger:#dc3545;
+  --orange:#f59f00;
+}
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--light);
+  color:var(--dark);
+}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+a{text-decoration:none;color:inherit}
+
+/* HEADER */
+.header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+}
+.topbar{
+  max-width:1250px;
+  margin:auto;
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:12px 18px;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:210px;
+}
+.logoIcon{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  background:var(--green);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-size:23px;
+}
+.logoText b{display:block;font-size:20px}
+.logoText span{font-size:12px;color:var(--muted)}
+
+.search{
+  flex:1;
+  position:relative;
+}
+.search input{
+  width:100%;
+  border:1px solid var(--border);
+  background:#f7f9f8;
+  padding:14px 45px 14px 45px;
+  border-radius:13px;
+  outline:none;
+}
+.search input:focus{
+  border-color:var(--green2);
+  background:#fff;
+}
+.searchIcon{
+  position:absolute;
+  left:16px;
+  top:13px;
+  font-size:19px;
+}
+.cartBtn{
+  position:relative;
+  background:var(--green);
+  color:#fff;
+  border-radius:13px;
+  padding:13px 18px;
+  white-space:nowrap;
+}
+.cartCount{
+  position:absolute;
+  top:-8px;
+  right:-7px;
+  width:23px;
+  height:23px;
+  border-radius:50%;
+  background:#e03131;
+  color:white;
+  font-size:12px;
+  display:grid;
+  place-items:center;
+}
+
+/* CATEGORY BAR */
+.categoryBar{
+  background:#fff;
+  border-top:1px solid #f0f2f1;
+  overflow:auto;
+}
+.categories{
+  max-width:1250px;
+  margin:auto;
+  display:flex;
+  gap:9px;
+  padding:11px 18px;
+}
+.catBtn{
+  padding:9px 15px;
+  border-radius:22px;
+  background:#f0f4f2;
+  color:#34423d;
+  white-space:nowrap;
+}
+.catBtn.active{
+  background:var(--green);
+  color:#fff;
+}
+
+/* MAIN */
+.container{
+  max-width:1250px;
+  margin:auto;
+  padding:20px 18px 100px;
+}
+
+/* HERO */
+.hero{
+  border-radius:22px;
+  background:linear-gradient(110deg,#087f5b,#12a876);
+  color:#fff;
+  padding:30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  overflow:hidden;
+  margin-bottom:25px;
+}
+.hero h1{
+  font-size:34px;
+  margin-bottom:10px;
+}
+.hero p{
+  opacity:.92;
+  max-width:570px;
+  line-height:1.6;
+}
+.hero button{
+  margin-top:18px;
+  padding:12px 20px;
+  border-radius:11px;
+  background:#fff;
+  color:var(--green);
+  font-weight:bold;
+}
+.heroGraphic{
+  font-size:100px;
+  opacity:.2;
+}
+
+/* SECTIONS */
+.sectionHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:25px 0 15px;
+}
+.sectionHead h2{font-size:23px}
+.sectionHead span{color:var(--muted);font-size:14px}
+
+.products{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:15px;
+}
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:17px;
+  overflow:hidden;
+  transition:.2s;
+}
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 25px rgba(0,0,0,.07);
+}
+.productImg{
+  height:180px;
+  background:#f6f8f7;
+  display:grid;
+  place-items:center;
+  position:relative;
+}
+.productImg img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.noImg{font-size:55px}
+.stockBadge{
+  position:absolute;
+  left:9px;
+  top:9px;
+  padding:5px 8px;
+  border-radius:7px;
+  font-size:11px;
+  background:#d3f9d8;
+  color:#087f23;
+}
+.stockBadge.low{
+  background:#fff3bf;
+  color:#8a6500;
+}
+.stockBadge.out{
+  background:#ffe3e3;
+  color:#c92a2a;
+}
+.cardBody{padding:13px}
+.brand{
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:5px;
+}
+.productName{
+  font-weight:bold;
+  line-height:1.35;
+  min-height:40px;
+}
+.unit{
+  color:var(--muted);
+  font-size:12px;
+  margin:5px 0;
+}
+.priceRow{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin:8px 0;
+}
+.price{
+  font-size:18px;
+  font-weight:bold;
+}
+.mrp{
+  color:#8a918d;
+  text-decoration:line-through;
+  font-size:12px;
+}
+.save{
+  color:#087f5b;
+  font-size:11px;
+}
+.addBtn{
+  width:100%;
+  padding:10px;
+  border-radius:9px;
+  background:var(--green);
+  color:white;
+  font-weight:bold;
+}
+.addBtn:disabled{
+  background:#adb5bd;
+  cursor:not-allowed;
+}
+.qtyBox{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#e8f7f1;
+  border-radius:9px;
+  overflow:hidden;
+}
+.qtyBox button{
+  width:38px;
+  height:38px;
+  background:var(--green);
+  color:#fff;
+  font-size:20px;
+}
+.qtyBox span{font-weight:bold}
+
+/* EMPTY */
+.empty{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--muted);
+  grid-column:1/-1;
+}
+
+/* CART DRAWER */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  z-index:2000;
+  display:none;
+}
+.overlay.show{display:block}
+.cartDrawer{
+  position:absolute;
+  right:0;
+  top:0;
+  height:100%;
+  width:min(470px,100%);
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+}
+.drawerHead{
+  padding:18px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.close{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:#f0f2f1;
+}
+.cartItems{
+  flex:1;
+  overflow:auto;
+  padding:15px;
+}
+.cartItem{
+  display:flex;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+.cartItem img{
+  width:65px;
+  height:65px;
+  object-fit:contain;
+  background:#f5f6f5;
+  border-radius:9px;
+}
+.cartInfo{flex:1}
+.cartInfo b{display:block;margin-bottom:4px}
+.cartPrice{font-weight:bold;color:var(--green)}
+.cartQty{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-top:8px;
+}
+.cartQty button{
+  width:27px;
+  height:27px;
+  border-radius:7px;
+  background:var(--green);
+  color:white;
+}
+.drawerBottom{
+  padding:17px;
+  border-top:1px solid var(--border);
+}
+.totalRow{
+  display:flex;
+  justify-content:space-between;
+  font-size:19px;
+  font-weight:bold;
+  margin-bottom:13px;
+}
+.checkoutBtn{
+  width:100%;
+  padding:14px;
+  background:var(--green);
+  color:#fff;
+  border-radius:11px;
+  font-weight:bold;
+}
+
+/* CHECKOUT */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:3000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+.modal.show{display:flex}
+.modalBox{
+  width:min(650px,100%);
+  max-height:94vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:20px;
+}
+.modalHead{
+  padding:18px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.form{
+  padding:18px;
+}
+.formGroup{margin-bottom:14px}
+.formGroup label{
+  display:block;
+  font-weight:bold;
+  font-size:14px;
+  margin-bottom:6px;
+}
+.formGroup input,
+.formGroup textarea,
+.formGroup select{
+  width:100%;
+  padding:12px;
+  border:1px solid #d9dfdc;
+  border-radius:10px;
+  outline:none;
+  background:#fff;
+}
+.formGroup textarea{
+  min-height:90px;
+  resize:vertical;
+}
+.payOptions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.payOption{
+  border:1px solid var(--border);
+  border-radius:11px;
+  padding:13px;
+  cursor:pointer;
+}
+.payOption.selected{
+  border:2px solid var(--green);
+  background:#edf9f5;
+}
+.bankBox{
+  display:none;
+  background:#f0f7f4;
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:14px;
+  line-height:1.7;
+}
+.bankBox.show{display:block}
+.placeOrder{
+  width:100%;
+  padding:14px;
+  background:var(--green);
+  color:#fff;
+  border-radius:11px;
+  font-weight:bold;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:#14231e;
+  color:#fff;
+  padding:13px 18px;
+  border-radius:10px;
+  z-index:5000;
+  transition:.3s;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:1000px){
+  .products{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:760px){
+  .topbar{gap:8px}
+  .logo{min-width:auto}
+  .logoText{display:none}
+  .search{order:3;flex-basis:100%}
+  .topbar{flex-wrap:wrap}
+  .hero{padding:23px}
+  .hero h1{font-size:26px}
+  .heroGraphic{display:none}
+  .products{grid-template-columns:repeat(2,1fr);gap:10px}
+  .productImg{height:155px}
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logoIcon">🛍️</div>
+      <div class="logoText">
+        <b>Saad Traders</b>
+        <span>Grocery • Daily Needs</span>
+      </div>
+    </div>
+
+    <div class="search">
+      <span class="searchIcon">🔎</span>
+      <input id="searchInput" placeholder="Search products, brands or categories...">
+    </div>
+
+    <button class="cartBtn" onclick="openCart()">
+      🛒 Cart
+      <span id="cartCount" class="cartCount">0</span>
+    </button>
+  </div>
+
+  <div class="categoryBar">
+    <div class="categories" id="categoryBar">
+      <button class="catBtn active" onclick="selectCategory('all',this)">All</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="hero">
+    <div>
+      <h1>Daily essentials, delivered easily.</h1>
+      <p>
+        Shop groceries and household products from Saad Traders.
+        Add your products, enter your address and place your order in seconds.
+      </p>
+      <button onclick="document.getElementById('productsSection').scrollIntoView({behavior:'smooth'})">
+        Shop Now →
+      </button>
+    </div>
+    <div class="heroGraphic">🛒</div>
+  </section>
+
+  <section id="productsSection">
+    <div class="sectionHead">
+      <h2>Popular Products</h2>
+      <span id="productCount">Loading...</span>
+    </div>
+
+    <div id="products" class="products">
+      <div class="empty">Loading products...</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- CART -->
+<div id="cartOverlay" class="overlay" onclick="closeCart(event)">
+  <aside class="cartDrawer" onclick="event.stopPropagation()">
+    <div class="drawerHead">
+      <h2>Your Cart</h2>
+      <button class="close" onclick="closeCart()">✕</button>
+    </div>
+
+    <div id="cartItems" class="cartItems"></div>
+
+    <div class="drawerBottom">
+      <div class="totalRow">
+        <span>Total</span>
+        <span id="cartTotal">₹0</span>
+      </div>
+      <button class="checkoutBtn" onclick="openCheckout()">
+        Proceed to Checkout →
+      </button>
+    </div>
+  </aside>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkoutModal" class="modal">
+  <div class="modalBox">
+    <div class="modalHead">
+      <h2>Complete Your Order</h2>
+      <button class="close" onclick="closeCheckout()">✕</button>
+    </div>
+
+    <div class="form">
+
+      <div class="formGroup">
+        <label>Customer Name *</label>
+        <input id="customerName" placeholder="Enter your full name">
+      </div>
+
+      <div class="formGroup">
+        <label>Mobile Number *</label>
+        <input id="customerPhone" type="tel" maxlength="10" placeholder="10-digit mobile number">
+      </div>
+
+      <div class="formGroup">
+        <label>Delivery Address *</label>
+        <textarea id="customerAddress" placeholder="House number, street, area, city..."></textarea>
+      </div>
+
+      <div class="formGroup">
+        <label>PIN Code *</label>
+        <input id="customerPin" inputmode="numeric" maxlength="6" placeholder="6-digit PIN code">
+      </div>
+
+      <div class="formGroup">
+        <label>Payment Method</label>
+
+        <div class="payOptions">
+          <div class="payOption selected" id="codOption" onclick="selectPayment('cod')">
+            <b>💵 Cash on Delivery</b>
+            <small> Pay when order arrives</small>
+          </div>
+
+          <div class="payOption" id="bankOption" onclick="selectPayment('bank')">
+            <b>🏦 Bank / UPI</b>
+            <small> Pay directly</small>
+          </div>
+        </div>
+      </div>
+
+      <div id="bankBox" class="bankBox">
+        <b>Payment Details</b><br>
+        Bank: Saad Traders<br>
+        Account Holder: Saad Traders<br>
+        UPI: <span id="upiText">YOUR-UPI-ID</span><br><br>
+        Please make the payment and keep your transaction/reference number.
+      </div>
+
+      <div class="formGroup" id="paymentRefGroup" style="display:none">
+        <label>Payment Reference Number</label>
+        <input id="paymentReference" placeholder="Enter UTR / transaction reference">
+      </div>
+
+      <div class="formGroup">
+        <label>Order Note (optional)</label>
+        <textarea id="orderNote" placeholder="Any special delivery instructions..."></textarea>
+      </div>
+
+      <div class="totalRow">
+        <span>Order Total</span>
+        <span id="checkoutTotal">₹0</span>
+      </div>
+
+      <button class="placeOrder" onclick="placeOrder()">
+        🛍️ Place Order
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* =========================================================
+   SUPABASE CONFIGURATION
+   ========================================================= */
+
+const SUPABASE_URL = "https://bzyonildigzsytuprfrh.supabase.co";
+
+/*
+  Use your SUPABASE PUBLISHABLE KEY here.
+
+  Do NOT put a secret/service_role key in this website.
+*/
+const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+
+let supabaseClient = null;
+
+if(
+  SUPABASE_KEY &&
+  !SUPABASE_KEY.includes("PASTE_YOUR")
+){
+  supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+}
+
+/* =========================================================
+   STORE STATE
+   ========================================================= */
+
+let products = [];
+let categories = [];
+let cart = JSON.parse(localStorage.getItem("saad_cart") || "[]");
+let selectedCategory = "all";
+let paymentMethod = "cod";
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function money(value){
+  return "₹" + Number(value || 0).toLocaleString("en-IN");
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function toast(message){
+  const el=document.getElementById("toast");
+  el.textContent=message;
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),2600);
+}
+
+function saveCart(){
+  localStorage.setItem("saad_cart",JSON.stringify(cart));
+  renderCart();
+  updateCartCount();
+}
+
+function updateCartCount(){
+  const count=cart.reduce((sum,item)=>sum+item.quantity,0);
+  document.getElementById("cartCount").textContent=count;
+}
+
+/* =========================================================
+   LOAD PRODUCTS
+   ========================================================= */
+
+async function loadProducts(){
+
+  if(!supabaseClient){
+    showDemoProducts();
+    return;
+  }
+
+  try{
+
+    /*
+      We intentionally use select("*") so the page works
+      with the existing products table without assuming
+      a "category" column.
+    */
+
+    const {data,error}=await supabaseClient
+      .from("products")
+      .select("*")
+      .order("name");
+
+    if(error) throw error;
+
+    products=(data || []).map(normalizeProduct);
+
+    await loadCategories();
+
+    renderProducts();
+
+  }catch(error){
+
+    console.error(error);
+
+    /*
+      If database access fails, show a helpful message
+      instead of a broken blank page.
+    */
+
+    document.getElementById("products").innerHTML=`
+      <div class="empty">
+        <h3>Products could not be loaded</h3>
+        <p style="margin-top:8px">
+          Please check your Supabase publishable key and
+          products table permissions.
+        </p>
+      </div>
+    `;
+  }
+}
+
+/* =========================================================
+   NORMALIZE PRODUCT
+   ========================================================= */
+
+function normalizeProduct(p){
+
+  return {
+    id:p.id,
+    name:p.name || p.product_name || "Unnamed Product",
+
+    price:Number(
+      p.price ??
+      p.sale_price ??
+      p.selling_price ??
+      0
+    ),
+
+    mrp:Number(
+      p.mrp ??
+      p.mrp_price ??
+      p.price ??
+      0
+    ),
+
+    stock:Number(
+      p.stock ??
+      p.stock_quantity ??
+      p.quantity ??
+      0
+    ),
+
+    unit:p.unit || p.pack_size || p.size || "",
+
+    description:
+      p.description ||
+      p.short_description ||
+      "",
+
+    image:
+      p.image_url ||
+      p.image_path ||
+      p.image ||
+      "",
+
+    category_id:p.category_id || null,
+
+    sku:p.sku || "",
+
+    brand_id:p.brand_id || null
+  };
+}
+
+/* =========================================================
+   LOAD CATEGORIES
+   ========================================================= */
+
+async function loadCategories(){
+
+  if(!supabaseClient) return;
+
+  try{
+
+    const {data,error}=await supabaseClient
+      .from("categories")
+      .select("*")
+      .order("sort_order");
+
+    if(error) throw error;
+
+    categories=data || [];
+
+    renderCategories();
+
+  }catch(error){
+
+    console.warn("Categories unavailable:",error);
+
+    categories=[];
+  }
+}
+
+function renderCategories(){
+
+  const bar=document.getElementById("categoryBar");
+
+  let html=`
+    <button class="catBtn ${selectedCategory==="all"?"active":""}"
+      onclick="selectCategory('all',this)">
+      All
+    </button>
+  `;
+
+  categories.forEach(c=>{
+
+    html+=`
+      <button class="catBtn ${selectedCategory===c.id?"active":""}"
+        onclick="selectCategory('${c.id}',this)">
+        ${escapeHtml(c.name)}
+      </button>
+    `;
+  });
+
+  bar.innerHTML=html;
+}
+
+/* =========================================================
+   DEMO DATA
+   ========================================================= */
+
+function showDemoProducts(){
+
+  products=[
+    {
+      id:"demo1",
+      name:"Fortune Mustard Oil 1L",
+      price:190,
+      mrp:220,
+      stock:25,
+      unit:"1 L",
+      category_id:"oil",
+      description:"Pure and healthy cooking oil",
+      image:""
+    },
+    {
+      id:"demo2",
+      name:"Aashirvaad Atta 5kg",
+      price:265,
+      mrp:300,
+      stock:8,
+      unit:"5 kg",
+      category_id:"atta",
+      description:"100% whole wheat",
+      image:""
+    },
+    {
+      id:"demo3",
+      name:"Tata Salt 1kg",
+      price:20,
+      mrp:25,
+      stock:30,
+      unit:"1 kg",
+      category_id:"grocery",
+      description:"Iodized salt",
+      image:""
+    },
+    {
+      id:"demo4",
+      name:"Red Label Tea 250g",
+      price:95,
+      mrp:110,
+      stock:32,
+      unit:"250 g",
+      category_id:"tea",
+      description:"Strong refreshing tea",
+      image:""
+    }
+  ];
+
+  categories=[
+    {id:"oil",name:"Cooking Oil"},
+    {id:"atta",name:"Atta & Flour"},
+    {id:"grocery",name:"Grocery"},
+    {id:"tea",name:"Tea & Coffee"}
+  ];
+
+  renderCategories();
+  renderProducts();
+}
+
+/* =========================================================
+   FILTERING
+   ========================================================= */
+
+function selectCategory(id,button){
+
+  selectedCategory=id;
+
+  document.querySelectorAll(".catBtn")
+    .forEach(x=>x.classList.remove("active"));
+
+  if(button) button.classList.add("active");
+
+  renderProducts();
+}
+
+document.getElementById("searchInput")
+.addEventListener("input",renderProducts);
+
+function getFilteredProducts(){
+
+  const query=
+    document.getElementById("searchInput")
+    .value
+    .trim()
+    .toLowerCase();
+
+  return products.filter(p=>{
+
+    const categoryMatch=
+      selectedCategory==="all" ||
+      p.category_id===selectedCategory;
+
+    const searchMatch=
+      !query ||
+      p.name.toLowerCase().includes(query) ||
+      p.sku.toLowerCase().includes(query) ||
+      p.description.toLowerCase().includes(query);
+
+    return categoryMatch && searchMatch;
+  });
+}
+
+/* =========================================================
+   PRODUCT RENDER
+   ========================================================= */
+
+function renderProducts(){
+
+  const list=getFilteredProducts();
+
+  document.getElementById("productCount").textContent=
+    list.length+" products";
+
+  const container=document.getElementById("products");
+
+  if(!list.length){
+
+    container.innerHTML=`
+      <div class="empty">
+        <div style="font-size:50px">🔎</div>
+        <h3>No products found</h3>
+        <p>Try another search or category.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML=list.map(productCard).join("");
+}
+
+function productCard(p){
+
+  const inCart=cart.find(x=>x.id===p.id);
+
+  let badge="";
+  let badgeClass="";
+
+  if(p.stock<=0){
+    badge="Out of stock";
+    badgeClass="out";
+  }
+  else if(p.stock<=10){
+    badge=`Only ${p.stock} left`;
+    badgeClass="low";
+  }
+  else{
+    badge="In stock";
+  }
+
+  const saving=
+    p.mrp>p.price
+    ? Math.round((1-p.price/p.mrp)*100)
+    : 0;
+
+  const image=p.image
+    ? `<img src="${escapeHtml(p.image)}"
+         alt="${escapeHtml(p.name)}"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+       <div class="noImg" style="display:none">📦</div>`
+    : `<div class="noImg">📦</div>`;
+
+  return `
+    <article class="card">
+
+      <div class="productImg">
+        ${image}
+        <span class="stockBadge ${badgeClass}">
+          ${badge}
+        </span>
+      </div>
+
+      <div class="cardBody">
+
+        <div class="brand">
+          ${escapeHtml(p.sku || "Saad Traders")}
+        </div>
+
+        <div class="productName">
+          ${escapeHtml(p.name)}
+        </div>
+
+        <div class="unit">
+          ${escapeHtml(p.unit)}
+        </div>
+
+        <div class="priceRow">
+          <span class="price">${money(p.price)}</span>
+          ${
+            p.mrp>p.price
+            ? `<span class="mrp">${money(p.mrp)}</span>`
+            : ""
+          }
+        </div>
+
+        ${
+          saving
+          ? `<div class="save">Save ${saving}%</div>`
+          : ""
+        }
+
+        <div style="height:8px"></div>
+
+        ${
+          p.stock<=0
+          ? `<button class="addBtn" disabled>Out of Stock</button>`
+          :
+          inCart
+          ?
+          `<div class="qtyBox">
+             <button onclick="changeQty('${p.id}',-1)">−</button>
+             <span>${inCart.quantity}</span>
+             <button onclick="changeQty('${p.id}',1)">+</button>
+           </div>`
+          :
+          `<button class="addBtn" onclick="addToCart('${p.id}')">
+             Add to Cart
+           </button>`
+        }
+
+      </div>
+    </article>
+  `;
+}
+
+/* =========================================================
+   CART
+   ========================================================= */
+
+function addToCart(id){
+
+  const product=products.find(p=>String(p.id)===String(id));
+
+  if(!product) return;
+
+  if(product.stock<=0){
+    toast("This product is out of stock.");
+    return;
+  }
+
+  const existing=cart.find(x=>String(x.id)===String(id));
+
+  if(existing){
+
+    if(existing.quantity>=product.stock){
+      toast("You cannot add more than available stock.");
+      return;
+    }
+
+    existing.quantity++;
+
+  }else{
+
+    cart.push({
+      id:product.id,
+      quantity:1
+    });
+  }
+
+  saveCart();
+  toast("Added to cart ✓");
+  renderProducts();
+}
+
+function changeQty(id,change){
+
+  const item=cart.find(x=>String(x.id)===String(id));
+
+  if(!item) return;
+
+  const product=products.find(p=>String(p.id)===String(id));
+
+  item.quantity+=change;
+
+  if(product && item.quantity>product.stock){
+    item.quantity=product.stock;
+    toast("Maximum available stock reached.");
+  }
+
+  if(item.quantity<=0){
+    cart=cart.filter(x=>String(x.id)!==String(id));
+  }
+
+  saveCart();
+  renderProducts();
+}
+
+function getCartDetails(){
+
+  return cart.map(item=>{
+
+    const product=
+      products.find(p=>String(p.id)===String(item.id));
+
+    if(!product) return null;
+
+    return {
+      product,
+      quantity:item.quantity,
+      total:product.price*item.quantity
+    };
+
+  }).filter(Boolean);
+}
+
+function cartTotal(){
+
+  return getCartDetails()
+    .reduce((sum,x)=>sum+x.total,0);
+}
+
+function renderCart(){
+
+  const list=getCartDetails();
+  const container=document.getElementById("cartItems");
+
+  if(!list.length){
+
+    container.innerHTML=`
+      <div class="empty">
+        <div style="font-size:55px">🛒</div>
+        <h3>Your cart is empty</h3>
+        <p>Add products to continue.</p>
+      </div>
+    `;
+
+  }else{
+
+    container.innerHTML=list.map(x=>{
+
+      const p=x.product;
+
+      return `
+        <div class="cartItem">
+
+          ${
+            p.image
+            ? `<img src="${escapeHtml(p.image)}">`
+            : `<div style="
+                 width:65px;height:65px;
+                 display:grid;place-items:center;
+                 background:#f4f6f5;border-radius:9px;
+                 font-size:30px">📦</div>`
+          }
+
+          <div class="cartInfo">
+            <b>${escapeHtml(p.name)}</b>
+            <div class="cartPrice">${money(p.price)}</div>
+
+            <div class="cartQty">
+              <button onclick="changeQty('${p.id}',-1)">−</button>
+              <span>${x.quantity}</span>
+              <button onclick="changeQty('${p.id}',1)">+</button>
+            </div>
+          </div>
+
+          <b>${money(x.total)}</b>
+
+        </div>
+      `;
+
+    }).join("");
+  }
+
+  document.getElementById("cartTotal").textContent=
+    money(cartTotal());
+}
+
+function openCart(){
+
+  renderCart();
+  document.getElementById("cartOverlay").classList.add("show");
+}
+
+function closeCart(event){
+
+  if(event && event.target!==document.getElementById("cartOverlay"))
+    return;
+
+  document.getElementById("cartOverlay").classList.remove("show");
+}
+
+/* =========================================================
+   CHECKOUT
+   ========================================================= */
+
+function openCheckout(){
+
+  if(!cart.length){
+    toast("Your cart is empty.");
+    return;
+  }
+
+  document.getElementById("checkoutTotal").textContent=
+    money(cartTotal());
+
+  document.getElementById("checkoutModal")
+    .classList.add("show");
+
+  document.getElementById("cartOverlay")
+    .classList.remove("show");
+}
+
+function closeCheckout(){
+  document.getElementById("checkoutModal")
+    .classList.remove("show");
+}
+
+function selectPayment(method){
+
+  paymentMethod=method;
+
+  document.getElementById("codOption")
+    .classList.toggle("selected",method==="cod");
+
+  document.getElementById("bankOption")
+    .classList.toggle("selected",method==="bank");
+
+  document.getElementById("bankBox")
+    .classList.toggle("show",method==="bank");
+
+  document.getElementById("paymentRefGroup")
+    .style.display=method==="bank" ? "block":"none";
+}
+
+/* =========================================================
+   PLACE ORDER
+   ========================================================= */
+
+async function placeOrder(){
+
+  const name=
+    document.getElementById("customerName").value.trim();
+
+  const phone=
+    document.getElementById("customerPhone").value.trim();
+
+  const address=
+    document.getElementById("customerAddress").value.trim();
+
+  const pin=
+    document.getElementById("customerPin").value.trim();
+
+  const note=
+    document.getElementById("orderNote").value.trim();
+
+  const paymentReference=
+    document.getElementById("paymentReference").value.trim();
+
+  if(!name){
+    toast("Please enter your name.");
+    return;
+  }
+
+  if(!/^[0-9]{10}$/.test(phone)){
+    toast("Please enter a valid 10-digit mobile number.");
+    return;
+  }
+
+  if(!address){
+    toast("Please enter your delivery address.");
+    return;
+  }
+
+  if(!/^[0-9]{6}$/.test(pin)){
+    toast("Please enter a valid 6-digit PIN code.");
+    return;
+  }
+
+  if(paymentMethod==="bank" && !paymentReference){
+    toast("Enter your payment reference number.");
+    return;
+  }
+
+  const details=getCartDetails();
+
+  if(!details.length){
+    toast("Your cart is empty.");
+    return;
+  }
+
+  const orderNumber=
+    "ST-"+Date.now().toString().slice(-8);
+
+  const orderData={
+    order_number:orderNumber,
+    customer_name:name,
+    customer_phone:phone,
+    customer_address:address,
+    pincode:pin,
+    payment_method:paymentMethod,
+    payment_reference:paymentReference || null,
+    notes:note || null,
+    total_amount:cartTotal(),
+    status:"pending"
+  };
+
+  /* -----------------------------------------
+     SAVE ORDER TO SUPABASE
+     ----------------------------------------- */
+
+  if(supabaseClient){
+
+    try{
+
+      /*
+        This expects an "orders" table containing
+        these customer/order fields.
+
+        If your existing orders table has different
+        column names, your admin panel can be connected
+        to the exact schema afterward.
+      */
+
+      const {data:order,error}=await supabaseClient
+        .from("orders")
+        .insert(orderData)
+        .select()
+        .single();
+
+      if(error) throw error;
+
+      /*
+        If your orders table has an order_items table,
+        this section can be enabled after matching its
+        exact columns.
+      */
+
+      toast("Order placed successfully ✓");
+
+      cart=[];
+      saveCart();
+
+      closeCheckout();
+
+      showOrderSuccess(orderNumber);
+
+      return;
+
+    }catch(error){
+
+      console.error(error);
+
+      /*
+        Do not silently pretend that an order was saved.
+        Instead give the customer a WhatsApp fallback.
+      */
+
+      showOrderFallback(
+        orderNumber,
+        name,
+        phone,
+        address,
+        pin,
+        details,
+        note,
+        paymentMethod
+      );
+
+      return;
+    }
+  }
+
+  /* DEMO / LOCAL FALLBACK */
+
+  showOrderFallback(
+    orderNumber,
+    name,
+    phone,
+    address,
+    pin,
+    details,
+    note,
+    paymentMethod
+  );
+}
+
+/* =========================================================
+   ORDER SUCCESS
+   ========================================================= */
+
+function showOrderSuccess(orderNumber){
+
+  alert(
+    "Order placed successfully!\\n\\n"+
+    "Order Number: "+orderNumber+
+    "\\n\\nSaad Traders will contact you for confirmation."
+  );
+}
+
+function showOrderFallback(
+  orderNumber,
+  name,
+  phone,
+  address,
+  pin,
+  details,
+  note,
+  payment
+){
+
+  let message=
+`SAAD TRADERS ORDER
+
+Order: ${orderNumber}
+
+Customer:
+${name}
+
+Phone:
+${phone}
+
+Address:
+${address}
+PIN: ${pin}
+
+Payment:
+${payment==="cod"?"Cash on Delivery":"Bank / UPI"}
+
+Products:
+`;
+
+  details.forEach(x=>{
+    message+=
+`${x.product.name} x ${x.quantity} = ${money(x.total)}
+`;
+  });
+
+  message+=`
+Total: ${money(cartTotal())}
+
+Note:
+${note || "None"}
+`;
+
+  /*
+    Replace with your Saad Traders WhatsApp number.
+    Use country code without +.
+  */
+
+  const whatsappNumber="919044580975";
+
+  const url=
+    "https://wa.me/"+whatsappNumber+
+    "?text="+encodeURIComponent(message);
+
+  if(confirm(
+    "The online order database is not available right now.\\n\\n"+
+    "You can send this order directly to Saad Traders on WhatsApp."
+  )){
+    window.open(url,"_blank");
+  }
+}
+
+/* =========================================================
+   START
+   ========================================================= */
+
+updateCartCount();
+renderCart();
+loadProducts();
+
+</script>
+
+</body>
+</html>
