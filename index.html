@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f5b">
+<title>Saad Traders — Admin Panel v2</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7f5;color:#17231f}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:flex;min-height:100vh}
+.sidebar{width:245px;background:#102c24;color:white;padding:20px;position:fixed;inset:0 auto 0 0}
+.logo{font-size:21px;font-weight:bold;margin-bottom:25px}.logo small{display:block;color:#a9c8bd;font-size:11px;margin-top:4px}
+.nav button{width:100%;padding:12px;text-align:left;border:0;background:transparent;color:#dcebe6;border-radius:9px;margin:3px 0}
+.nav button.active,.nav button:hover{background:#087f5b;color:white}.main{margin-left:245px;width:calc(100% - 245px);padding:25px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.top h1{margin:0;font-size:27px}.status{font-size:12px;color:#68756f}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat{background:white;border:1px solid #e0e7e3;border-radius:15px;padding:18px}
+.stat b{font-size:26px;display:block;margin-top:7px}.stat span{color:#68756f;font-size:13px}
+.panel{background:white;border:1px solid #e0e7e3;border-radius:15px;padding:20px;margin-top:20px}
+.panelHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.panelHead h2{margin:0;font-size:19px}
+.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:bold}.green{background:#087f5b;color:white}.gray{background:#edf1ef;color:#27352f}.red{background:#dc3545;color:white}.orange{background:#f59f00;color:white}
+.search{width:100%;padding:11px;border:1px solid #d9e0dc;border-radius:9px}table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:12px;border-bottom:1px solid #edf0ee;font-size:13px}th{color:#65736d;background:#fafbfa}
+.badge{padding:5px 8px;border-radius:7px;font-size:11px;background:#e7f6ef;color:#087f5b}.badge.warn{background:#fff3cd;color:#856404}.badge.red{background:#ffe3e3;color:#b02a37}
+.productImg{width:48px;height:48px;border-radius:8px;object-fit:contain;background:#f4f6f5}.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}.modal.show{display:flex}
+.box{background:white;width:min(850px,100%);max-height:94vh;overflow:auto;border-radius:17px}.boxHead{padding:18px;border-bottom:1px solid #e5e9e7;display:flex;justify-content:space-between}
+.form{padding:20px}.row{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{margin-bottom:13px}.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:11px;border:1px solid #d8dfdb;border-radius:9px}textarea{min-height:75px;resize:vertical}
+.imageArea{border:2px dashed #cbd7d1;border-radius:13px;padding:16px}.preview{width:150px;height:150px;object-fit:contain;background:#f5f7f6;border-radius:10px;margin-top:10px}
+.imageBtns{display:flex;gap:8px;flex-wrap:wrap}.orderCard{border:1px solid #e1e7e3;border-radius:12px;padding:15px;margin-bottom:10px}
+.orderTop{display:flex;justify-content:space-between;gap:10px}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.mobileNav{display:none}
+@media(max-width:850px){.sidebar{display:none}.main{margin-left:0;width:100%;padding:15px;padding-bottom:75px}.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}.mobileNav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#102c24;z-index:40}.mobileNav button{flex:1;padding:12px 3px;background:none;color:white;border:0;font-size:11px}}
+@media(max-width:520px){.grid{grid-template-columns:1fr 1fr}.stat b{font-size:21px}table{min-width:650px}.panel{overflow:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="logo">🛒 Saad Traders<small>Administrator Dashboard</small></div>
+<div class="nav">
+<button class="active" onclick="show('dashboard',this)">📊 Dashboard</button>
+<button onclick="show('products',this)">📦 Products</button>
+<button onclick="show('orders',this)">🛍️ Orders</button>
+<button onclick="show('payments',this)">💳 Payments</button>
+<button onclick="show('invoices',this)">🧾 Invoices</button>
+<button onclick="show('stock',this)">📈 Stock</button>
+<button onclick="show('profit',this)">💰 Profit</button>
+<button onclick="show('settings',this)">⚙️ Settings</button>
+</div></aside>
+<main class="main">
+<div class="top"><div><h1 id="title">Dashboard</h1><div class="status" id="status">Connecting to Supabase...</div></div><button class="btn gray" onclick="loadAll()">↻ Refresh</button></div>
+
+<section id="dashboard">
+<div class="grid">
+<div class="stat"><span>Products</span><b id="sProducts">0</b></div>
+<div class="stat"><span>New Orders</span><b id="sOrders">0</b></div>
+<div class="stat"><span>Pending Payments</span><b id="sPayments">0</b></div>
+<div class="stat"><span>Total Sales</span><b id="sSales">₹0</b></div>
+</div>
+<div class="panel"><div class="panelHead"><h2>Recent Orders</h2><button class="btn green" onclick="show('orders')">View Orders</button></div><div id="recentOrders">Loading...</div></div>
+</section>
+
+<section id="products" class="hidden">
+<div class="panelHead"><input class="search" id="productSearch" placeholder="Search products..." oninput="renderProducts()"><button class="btn green" onclick="openProduct()">+ Add Product</button></div>
+<div class="panel"><div style="overflow:auto"><table><thead><tr><th>Image</th><th>Product</th><th>SKU</th><th>Category</th><th>MRP</th><th>Selling</th><th>Stock</th><th>Action</th></tr></thead><tbody id="productTable"></tbody></table></div></div>
+</section>
+
+<section id="orders" class="hidden"><div class="panel"><div class="panelHead"><h2>Customer Orders</h2><input class="search" style="max-width:300px" id="orderSearch" placeholder="Search order/customer..." oninput="renderOrders()"></div><div id="ordersList">Loading...</div></div></section>
+
+<section id="payments" class="hidden"><div class="panel"><div class="panelHead"><h2>Payment History</h2></div><div style="overflow:auto"><table><thead><tr><th>Date</th><th>Order</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th></tr></thead><tbody id="paymentTable"></tbody></table></div></div></section>
+
+<section id="invoices" class="hidden"><div class="panel"><div class="panelHead"><h2>Invoices</h2></div><div style="overflow:auto"><table><thead><tr><th>Invoice</th><th>Order</th><th>Date</th><th>Subtotal</th><th>Total</th><th>Action</th></tr></thead><tbody id="invoiceTable"></tbody></table></div></div></section>
+
+<section id="stock" class="hidden"><div class="panel"><div class="panelHead"><h2>Current Stock</h2></div><div style="overflow:auto"><table><thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Unit</th><th>Status</th></tr></thead><tbody id="stockTable"></tbody></table></div></div></section>
+
+<section id="profit" class="hidden"><div class="grid"><div class="stat"><span>Sales</span><b id="profitSales">₹0</b></div><div class="stat"><span>Purchase Cost</span><b id="profitCost">₹0</b></div><div class="stat"><span>Gross Profit</span><b id="profitGross">₹0</b></div><div class="stat"><span>Profit Margin</span><b id="profitMargin">0%</b></div></div><div class="panel"><p class="status">Profit is calculated from order-item purchase prices where available.</p></div></section>
+
+<section id="settings" class="hidden">
+<div class="panel"><h2>Business Settings</h2><div class="row" style="margin-top:15px">
+<div class="field"><label>Business Name</label><input id="bizName"></div><div class="field"><label>Phone</label><input id="bizPhone"></div>
+<div class="field"><label>Email</label><input id="bizEmail"></div><div class="field"><label>GSTIN</label><input id="bizGstin"></div>
+</div><div class="field"><label>Address</label><textarea id="bizAddress"></textarea></div><button class="btn green" onclick="saveBusiness()">Save Business Settings</button></div>
+<div class="panel"><h2>Payment Details</h2><div class="row" style="margin-top:15px">
+<div class="field"><label>UPI ID</label><input id="upi"></div><div class="field"><label>Account Holder</label><input id="holder"></div>
+<div class="field"><label>Bank Name</label><input id="bank"></div><div class="field"><label>Account Number</label><input id="account"></div>
+<div class="field"><label>IFSC</label><input id="ifsc"></div><div class="field"><label>Branch</label><input id="branch"></div>
+</div><div class="field"><label>Payment Instructions</label><textarea id="paymentInstructions"></textarea></div><button class="btn green" onclick="savePayment()">Save Payment Details</button></div>
+</section>
+</main></div>
+
+<div class="mobileNav"><button onclick="show('dashboard')">📊<br>Home</button><button onclick="show('products')">📦<br>Products</button><button onclick="show('orders')">🛍️<br>Orders</button><button onclick="show('payments')">💳<br>Payments</button><button onclick="show('settings')">⚙️<br>Settings</button></div>
+
+<div class="modal" id="productModal"><div class="box"><div class="boxHead"><b id="productModalTitle">Add Product</b><button class="btn gray" onclick="closeProduct()">✕</button></div>
+<div class="form"><input type="hidden" id="productId">
+<div class="row">
+<div class="field"><label>Product Name *</label><input id="pName" placeholder="Example: Fortune Mustard Oil 1 L"></div>
+<div class="field"><label>SKU</label><input id="pSku" placeholder="Example: FORTUNE-OIL-1L"></div>
+<div class="field"><label>Brand (Optional)</label><select id="pBrand"><option value="">Select Brand</option></select></div>
+<div class="field"><label>Category *</label><select id="pCategory"></select></div>
+<div class="field"><label>Pack Size / Unit *</label><input id="pUnit" placeholder="Example: 1 L, 5 kg"></div>
+<div class="field"><label>Stock *</label><input id="pStock" type="number" min="0" value="0"></div>
+<div class="field"><label>MRP *</label><input id="pMrp" type="number" min="0" step="0.01" value="0"></div>
+<div class="field"><label>Selling Price *</label><input id="pPrice" type="number" min="0" step="0.01" value="0"></div>
+<div class="field"><label>GST %</label><input id="pGst" type="number" min="0" step="0.01" value="0"></div>
+<div class="field"><label>Labour Charge</label><input id="pLabour" type="number" min="0" step="0.01" value="0"></div><div class="field"><label>Bori/Pati Charge</label><input id="pBori" type="number" min="0" step="0.01" value="0"></div>
+</div>
+<div class="field"><label>Description</label><textarea id="pDescription" placeholder="Product description"></textarea></div>
+<div class="field"><label>Product Image</label><div class="imageArea"><div class="status" style="margin-bottom:10px">Choose a photo from your phone or paste a direct JPG/PNG/WebP image URL.</div>
+<div class="imageBtns"><label class="btn green">📱 Choose from Gallery<input type="file" id="imageFile" accept="image/*" hidden onchange="previewImage(this)"></label><button class="btn gray" type="button" onclick="useUrl()">🔗 Use Image URL</button><button class="btn gray" type="button" onclick="clearImage()">Remove Image</button></div>
+<div class="field" id="urlArea" style="display:block;margin-top:12px"><label>Image URL</label><input id="imageUrl" placeholder="https://example.com/product.jpg" oninput="previewUrl()"></div>
+<img id="imagePreview" class="preview hidden"><div id="uploadStatus" class="status" style="margin-top:8px"></div>
+</div></div>
+<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn gray" onclick="closeProduct()">Cancel</button><button class="btn green" onclick="saveProduct()">Save Product</button></div>
+</div></div></div>
+
+<div class="modal" id="orderModal"><div class="box"><div class="boxHead"><b>Order Details</b><button class="btn gray" onclick="closeOrder()">✕</button></div><div class="form" id="orderDetails"></div></div></div>
+
+<script>
+const SUPABASE_URL="https://bzyonildigzsytuprfrh.supabase.co";
+const SUPABASE_KEY="sb_publishable_bHzySPhRmTgA_2gaSdeaNw_KdMq-hBL";
+if(!window.supabase){document.getElementById("status").textContent="Supabase library failed to load"; throw new Error("Supabase library failed to load. Check internet connection or CDN access.");}
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const IMAGE_BUCKET="product-images";
+let products=[],categories=[],brands=[],orders=[],payments=[],invoices=[],currentImagePath="",selectedImageFile=null;
+
+const titles={dashboard:"Dashboard",products:"Products",orders:"Orders",payments:"Payment History",invoices:"Invoices",stock:"Stock",profit:"Profit",settings:"Settings"};
+function show(section,button){document.querySelectorAll("main section").forEach(x=>x.classList.add("hidden"));document.getElementById(section).classList.remove("hidden");document.getElementById("title").textContent=titles[section]||"Dashboard";document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));if(button)button.classList.add("active");if(section==="products")renderProducts();if(section==="orders")renderOrders();if(section==="payments")renderPayments();if(section==="invoices")renderInvoices();if(section==="stock")renderStock();if(section==="profit")calculateProfit();if(section==="settings")loadSettings();}
+function money(v){return "₹"+Number(v||0).toLocaleString("en-IN")}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function notify(msg){alert(msg)}
+function publicImage(path){if(!path)return "";if(path.startsWith("http"))return path;return db.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl}
+
+async function loadAll(){
+ document.getElementById("status").textContent="Loading database...";
+ try{await Promise.all([loadCategories(),loadBrands(),loadProducts(),loadOrders(),loadPayments(),loadInvoices()]);updateDashboard();document.getElementById("status").textContent="Connected ✓"}
+ catch(e){console.error(e);document.getElementById("status").textContent="Database error — check RLS/table permissions";notify("Database connection error:\n\n"+e.message)}
+}
+async function loadCategories(){
+ const {data,error}=await db.from("categories").select("*").eq("is_active",true).order("sort_order");
+ if(error)throw error;categories=data||[];
+ document.getElementById("pCategory").innerHTML=`<option value="">Select category</option>`+categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+}
+async function loadBrands(){
+ const {data,error}=await db.from("brands").select("id,name").eq("is_active",true).order("name");
+ if(error)throw error;brands=data||[];
+ const el=document.getElementById("pBrand");
+ if(el)el.innerHTML=`<option value="">Select Brand (Optional)</option>`+brands.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("");
+}
+async function loadProducts(){
+ const {data,error}=await db.from("products").select("*").order("created_at",{ascending:false});
+ if(error)throw error;products=data||[];renderProducts();renderStock();
+}
+function renderProducts(){
+ const q=(document.getElementById("productSearch")?.value||"").toLowerCase(),list=products.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.sku||"").toLowerCase().includes(q)),body=document.getElementById("productTable");if(!body)return;
+ body.innerHTML=list.map(p=>{const cat=categories.find(c=>c.id===p.category_id),image=publicImage(p.image_path);return `<tr><td>${image?`<img class="productImg" src="${esc(image)}">`:"📦"}</td><td><b>${esc(p.name)}</b><br><small>${esc(p.unit)}</small></td><td>${esc(p.sku||"-")}</td><td>${esc(cat?.name||"-")}</td><td>${money(p.mrp)}</td><td><b>${money(p.selling_price)}</b></td><td><span class="badge ${p.stock<=0?"red":p.stock<=10?"warn":""}">${p.stock}</span></td><td><button class="btn green" onclick="editProduct('${p.id}')">Edit</button></td></tr>`}).join("");
+}
+function openProduct(product=null){document.getElementById("productModal").classList.add("show");document.getElementById("productModalTitle").textContent=product?"Edit Product":"Add Product";clearProductForm();if(product){document.getElementById("productId").value=product.id;document.getElementById("pName").value=product.name;document.getElementById("pSku").value=product.sku||"";document.getElementById("pBrand").value=product.brand_id||"";document.getElementById("pUnit").value=product.unit||"";document.getElementById("pStock").value=product.stock||0;document.getElementById("pMrp").value=product.mrp||0;document.getElementById("pPrice").value=product.selling_price||0;document.getElementById("pGst").value=product.gst_rate||0;document.getElementById("pLabour").value=product.labour_charge||0;document.getElementById("pBori").value=product.bori_pati_charge||0;document.getElementById("pDescription").value=product.description||"";document.getElementById("pCategory").value=product.category_id||"";currentImagePath=product.image_path||"";if(currentImagePath){document.getElementById("imagePreview").src=publicImage(currentImagePath);document.getElementById("imagePreview").classList.remove("hidden")}}}
+function editProduct(id){const product=products.find(p=>p.id===id);if(product)openProduct(product)}
+function closeProduct(){document.getElementById("productModal").classList.remove("show")}
+function clearProductForm(){document.getElementById("productId").value="";document.getElementById("pName").value="";document.getElementById("pSku").value="";document.getElementById("pBrand").value="";document.getElementById("pUnit").value="";document.getElementById("pStock").value="0";document.getElementById("pMrp").value="0";document.getElementById("pPrice").value="0";document.getElementById("pGst").value="0";document.getElementById("pLabour").value="0";document.getElementById("pBori").value="0";document.getElementById("pDescription").value="";document.getElementById("pCategory").value="";document.getElementById("imageFile").value="";document.getElementById("imageUrl").value="";document.getElementById("urlArea").style.display="block";document.getElementById("imagePreview").classList.add("hidden");document.getElementById("uploadStatus").textContent="";currentImagePath="";selectedImageFile=null}
+function previewImage(input){const file=input.files?.[0];if(!file)return;selectedImageFile=file;const reader=new FileReader();reader.onload=e=>{const img=document.getElementById("imagePreview");img.src=e.target.result;img.classList.remove("hidden")};reader.readAsDataURL(file);document.getElementById("uploadStatus").textContent="Image selected. It will upload when you save."}
+function useUrl(){document.getElementById("urlArea").style.display="block";document.getElementById("imageUrl").focus()}
+function previewUrl(){const url=document.getElementById("imageUrl").value.trim();if(!url)return;const img=document.getElementById("imagePreview");img.src=url;img.classList.remove("hidden");currentImagePath=url}
+function clearImage(){selectedImageFile=null;currentImagePath="";document.getElementById("imageFile").value="";document.getElementById("imageUrl").value="";document.getElementById("imagePreview").classList.add("hidden");document.getElementById("uploadStatus").textContent=""}
+async function uploadImage(file){const safeName=file.name.toLowerCase().replace(/[^a-z0-9.\-_]/g,"-"),path="products/"+Date.now()+"-"+safeName;document.getElementById("uploadStatus").textContent="Uploading image...";const {error}=await db.storage.from(IMAGE_BUCKET).upload(path,file,{cacheControl:"3600",upsert:false});if(error)throw error;document.getElementById("uploadStatus").textContent="Image uploaded ✓";return path}
+async function saveProduct(){
+ const id=document.getElementById("productId").value,name=document.getElementById("pName").value.trim(),category=document.getElementById("pCategory").value;if(!name)return notify("Enter product name.");if(!category)return notify("Select category.");
+ try{let imagePath=currentImagePath;if(selectedImageFile)imagePath=await uploadImage(selectedImageFile);else{const url=document.getElementById("imageUrl").value.trim();if(url)imagePath=url}
+ const payload={name,sku:document.getElementById("pSku").value.trim()||null,brand_id:document.getElementById("pBrand").value||null,category_id:category,description:document.getElementById("pDescription").value.trim()||null,mrp:Number(document.getElementById("pMrp").value)||0,selling_price:Number(document.getElementById("pPrice").value)||0,gst_rate:Number(document.getElementById("pGst").value)||0,stock:Number(document.getElementById("pStock").value)||0,unit:document.getElementById("pUnit").value.trim()||"piece",labour_charge:Number(document.getElementById("pLabour").value)||0,bori_pati_charge:Number(document.getElementById("pBori").value)||0,image_path:imagePath||null,is_active:true};
+ let result=id?await db.from("products").update(payload).eq("id",id):await db.from("products").insert(payload);if(result.error)throw result.error;notify(id?"Product updated ✓":"Product added ✓");closeProduct();await loadProducts();updateDashboard()
+ }catch(e){console.error(e);notify("Could not save product:\n\n"+e.message)}
+}
+async function loadOrders(){const {data,error}=await db.from("orders").select("*").order("created_at",{ascending:false});if(error)throw error;orders=data||[];renderOrders()}
+function renderOrders(){const q=(document.getElementById("orderSearch")?.value||"").toLowerCase(),list=orders.filter(o=>!q||String(o.order_number).includes(q)||(o.customer_name||"").toLowerCase().includes(q)||(o.customer_phone||"").includes(q));document.getElementById("ordersList").innerHTML=list.map(o=>`<div class="orderCard"><div class="orderTop"><div><b>Order #${esc(o.order_number)}</b><br><small>${esc(o.customer_name)} • ${esc(o.customer_phone)}</small></div><span class="badge">${esc(o.order_status)}</span></div><p><b>Total:</b> ${money(o.grand_total)} • <b>Payment:</b> ${esc(o.payment_status)}</p><small>📍 ${esc(o.delivery_address)}${o.delivery_city?", "+esc(o.delivery_city):""}${o.delivery_pincode?" - "+esc(o.delivery_pincode):""}</small><div class="actions"><button class="btn green" onclick="openOrder('${o.id}')">Open Order</button><button class="btn green" onclick="updateOrder('${o.id}','accepted')">Accept</button><button class="btn orange" onclick="updateOrder('${o.id}','processing')">Processing</button><button class="btn green" onclick="updateOrder('${o.id}','shipped')">Shipped</button><button class="btn green" onclick="updateOrder('${o.id}','delivered')">Delivered</button><button class="btn red" onclick="updateOrder('${o.id}','rejected')">Reject</button></div></div>`).join("")}
+async function updateOrder(id,status){const {error}=await db.from("orders").update({order_status:status,updated_at:new Date().toISOString()}).eq("id",id);if(error)return notify(error.message);notify("Order updated ✓");await loadOrders();updateDashboard()}
+async function openOrder(id){const order=orders.find(o=>o.id===id);if(!order)return;const {data:items}=await db.from("order_items").select("*").eq("order_id",id);document.getElementById("orderDetails").innerHTML=`<h2>Order #${esc(order.order_number)}</h2><p><b>Customer:</b> ${esc(order.customer_name)}<br><b>Phone:</b> ${esc(order.customer_phone)}<br><b>Address:</b> ${esc(order.delivery_address)}<br>${esc(order.delivery_city||"")} ${esc(order.delivery_state||"")} ${esc(order.delivery_pincode||"")}</p><hr><h3>Products</h3>${(items||[]).map(i=>`<p>${esc(i.product_name)} × ${esc(i.quantity)} — ${money(i.line_total)}</p>`).join("")}<hr><p><b>Subtotal:</b> ${money(order.subtotal)}</p><p><b>Discount:</b> ${money(order.discount)}</p><p><b>Grand Total:</b> ${money(order.grand_total)}</p><p><b>Payment:</b> ${esc(order.payment_status)}</p><p><b>Status:</b> ${esc(order.order_status)}</p><div class="actions"><button class="btn green" onclick="updateOrder('${order.id}','accepted');closeOrder()">Accept Order</button><button class="btn orange" onclick="updateOrder('${order.id}','processing');closeOrder()">Processing</button><button class="btn green" onclick="updateOrder('${order.id}','shipped');closeOrder()">Shipped</button><button class="btn green" onclick="updateOrder('${order.id}','delivered');closeOrder()">Delivered</button></div>`;document.getElementById("orderModal").classList.add("show")}
+function closeOrder(){document.getElementById("orderModal").classList.remove("show")}
+async function loadPayments(){const {data,error}=await db.from("payments").select("*").order("created_at",{ascending:false});if(error)throw error;payments=data||[];renderPayments()}
+function renderPayments(){document.getElementById("paymentTable").innerHTML=payments.map(p=>`<tr><td>${new Date(p.created_at).toLocaleDateString("en-IN")}</td><td>${esc(p.order_id)}</td><td>${money(p.amount)}</td><td>${esc(p.method)}</td><td>${esc(p.transaction_reference||"-")}</td><td><span class="badge">${esc(p.status)}</span></td></tr>`).join("")}
+async function loadInvoices(){const {data,error}=await db.from("invoices").select("*").order("created_at",{ascending:false});if(error)throw error;invoices=data||[];renderInvoices()}
+function renderInvoices(){document.getElementById("invoiceTable").innerHTML=invoices.map(i=>`<tr><td>ST-${esc(i.invoice_number)}</td><td>${esc(i.order_id)}</td><td>${esc(i.invoice_date)}</td><td>${money(i.subtotal)}</td><td>${money(i.grand_total)}</td><td><button class="btn green" onclick="printInvoice('${i.id}')">View / Print</button></td></tr>`).join("")}
+async function printInvoice(id){
+ const inv=invoices.find(i=>i.id===id); if(!inv)return;
+ const {data:items,error}=await db.from("order_items").select("*").eq("order_id",inv.order_id);
+ if(error)return notify(error.message);
+ const rows=(items||[]).map(i=>"<tr><td>"+esc(i.product_name)+"</td><td>"+esc(i.quantity)+"</td><td>"+money(i.unit_price)+"</td><td>"+money(i.line_total)+"</td></tr>").join("");
+ const html='<!DOCTYPE html><html><head><title>Invoice ST-'+esc(inv.invoice_number)+'</title><style>body{font-family:Arial;padding:35px}table{width:100%;border-collapse:collapse;margin-top:25px}th,td{border:1px solid #ddd;padding:10px;text-align:left}.total{text-align:right;font-size:18px;font-weight:bold}</style></head><body><h1>SAAD TRADERS</h1><p>Invoice: ST-'+esc(inv.invoice_number)+'</p><p>Date: '+esc(inv.invoice_date)+'</p><table><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>'+rows+'</table><p class="total">Grand Total: '+money(inv.grand_total)+'</p></body></html>';
+ const win=window.open("","_blank"); if(!win)return notify("Please allow pop-ups to print the invoice.");
+ win.document.write(html); win.document.close(); setTimeout(()=>win.print(),300);
+}
+function renderStock(){const body=document.getElementById("stockTable");if(!body)return;body.innerHTML=products.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.sku||"-")}</td><td>${p.stock}</td><td>${esc(p.unit)}</td><td><span class="badge ${p.stock<=0?"red":p.stock<=10?"warn":""}">${p.stock<=0?"Out of stock":p.stock<=10?"Low stock":"In stock"}</span></td></tr>`).join("")}
+async function calculateProfit(){let sales=0,cost=0;const {data:items}=await db.from("order_items").select("*");(items||[]).forEach(i=>{sales+=Number(i.line_total||0);cost+=Number(i.purchase_price||0)*Number(i.quantity||0)});const gross=sales-cost;document.getElementById("profitSales").textContent=money(sales);document.getElementById("profitCost").textContent=money(cost);document.getElementById("profitGross").textContent=money(gross);document.getElementById("profitMargin").textContent=sales?((gross/sales)*100).toFixed(1)+"%":"0%"}
+async function loadSettings(){const {data:b}=await db.from("business_settings").select("*").limit(1).maybeSingle();if(b){document.getElementById("bizName").value=b.business_name||"";document.getElementById("bizPhone").value=b.phone||"";document.getElementById("bizEmail").value=b.email||"";document.getElementById("bizGstin").value=b.gstin||"";document.getElementById("bizAddress").value=[b.address,b.city,b.state,b.pincode].filter(Boolean).join(", ")}const {data:p}=await db.from("payment_settings").select("*").eq("is_active",true).limit(1).maybeSingle();if(p){document.getElementById("upi").value=p.upi_id||"";document.getElementById("holder").value=p.account_holder||"";document.getElementById("bank").value=p.bank_name||"";document.getElementById("account").value=p.account_number||"";document.getElementById("ifsc").value=p.ifsc_code||"";document.getElementById("branch").value=p.branch_name||"";document.getElementById("paymentInstructions").value=p.payment_instructions||""}}
+async function saveBusiness(){const payload={business_name:document.getElementById("bizName").value.trim(),phone:document.getElementById("bizPhone").value.trim(),email:document.getElementById("bizEmail").value.trim(),gstin:document.getElementById("bizGstin").value.trim(),address:document.getElementById("bizAddress").value.trim()};const {data:existing}=await db.from("business_settings").select("id").limit(1).maybeSingle();const result=existing?await db.from("business_settings").update(payload).eq("id",existing.id):await db.from("business_settings").insert(payload);if(result.error)return notify(result.error.message);notify("Business settings saved ✓")}
+async function savePayment(){const payload={business_name:"Saad Traders",upi_id:document.getElementById("upi").value.trim(),account_holder:document.getElementById("holder").value.trim(),bank_name:document.getElementById("bank").value.trim(),account_number:document.getElementById("account").value.trim(),ifsc_code:document.getElementById("ifsc").value.trim(),branch_name:document.getElementById("branch").value.trim(),payment_instructions:document.getElementById("paymentInstructions").value.trim(),is_active:true};const {data:existing}=await db.from("payment_settings").select("id").eq("is_active",true).limit(1).maybeSingle();const result=existing?await db.from("payment_settings").update(payload).eq("id",existing.id):await db.from("payment_settings").insert(payload);if(result.error)return notify(result.error.message);notify("Payment details saved ✓")}
+function updateDashboard(){document.getElementById("sProducts").textContent=products.length;document.getElementById("sOrders").textContent=orders.filter(o=>["new","pending"].includes(o.order_status)).length;document.getElementById("sPayments").textContent=payments.filter(p=>p.status==="pending").length;document.getElementById("sSales").textContent=money(orders.reduce((sum,o)=>sum+Number(o.grand_total||0),0));document.getElementById("recentOrders").innerHTML=orders.slice(0,6).map(o=>`<div class="orderCard"><div class="orderTop"><b>#${esc(o.order_number)}</b><span class="badge">${esc(o.order_status)}</span></div><div>${esc(o.customer_name)} • ${esc(o.customer_phone)}</div><b>${money(o.grand_total)}</b></div>`).join("")}
+loadAll();
+</script>
+</body>
+</html>
