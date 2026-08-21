@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#087f5b">
+<title>Saad Traders — Grocery Store</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--g:#087f5b;--g2:#075f46;--bg:#f5f7f6;--card:#fff;--text:#14231d;--muted:#69766f;--line:#e4e9e6;--red:#d92d3b}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+.head{max-width:1200px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+.logo{font-weight:900;font-size:22px;color:var(--g);white-space:nowrap}.tag{font-size:11px;color:var(--muted);display:block}
+.search{flex:1;position:relative}.search input{width:100%;padding:12px 15px 12px 42px;border:1px solid var(--line);border-radius:12px;background:#f8faf9}
+.search span{position:absolute;left:14px;top:11px}.headBtn{border:0;background:#edf5f1;padding:11px 13px;border-radius:11px;font-weight:700}
+.badge{position:absolute;top:-7px;right:-7px;background:var(--red);color:#fff;border-radius:20px;font-size:10px;padding:3px 6px}
+.iconBtn{position:relative}.hero{background:linear-gradient(135deg,#087f5b,#0b9b70);color:#fff;padding:28px 16px}.heroIn{max-width:1200px;margin:auto}.hero h1{margin:0 0 8px;font-size:30px}.hero p{margin:0;color:#dff8ed}
+.wrap{max-width:1200px;margin:auto;padding:18px 16px 90px}
+.cats{display:flex;gap:9px;overflow:auto;padding:2px 0 14px}.cat{border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:30px;white-space:nowrap}.cat.active{background:var(--g);color:#fff;border-color:var(--g)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.product{background:#fff;border:1px solid var(--line);border-radius:15px;padding:12px;position:relative;display:flex;flex-direction:column;min-width:0}.pic{width:100%;aspect-ratio:1/1;object-fit:contain;background:#f7f9f8;border-radius:11px}.pname{font-weight:800;margin-top:10px;line-height:1.25}.unit{font-size:12px;color:var(--muted);margin-top:4px}.price{font-size:18px;font-weight:900;margin-top:7px}.mrp{text-decoration:line-through;color:#89938e;font-size:12px;margin-left:6px;font-weight:normal}.add{border:0;background:var(--g);color:#fff;border-radius:9px;padding:9px;margin-top:10px;font-weight:800}.add:disabled{background:#c7d0cc;cursor:not-allowed}.stock{font-size:11px;color:var(--muted);margin-top:5px}
+.sectionTitle{display:flex;justify-content:space-between;align-items:center;margin:20px 0 12px}.sectionTitle h2{margin:0;font-size:21px}
+.drawer{position:fixed;inset:0;background:#0007;z-index:50;display:none}.drawer.show{display:block}.sheet{position:absolute;right:0;top:0;bottom:0;width:min(520px,100%);background:#fff;overflow:auto;padding:18px}.sheetHead{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px}.close{border:0;background:#eef2f0;border-radius:50%;width:38px;height:38px}
+.cartRow{display:grid;grid-template-columns:55px 1fr auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.cartRow img{width:55px;height:55px;object-fit:contain;background:#f6f8f7;border-radius:8px}.qty{display:flex;align-items:center;gap:7px}.qty button{width:28px;height:28px;border:1px solid var(--line);background:#fff;border-radius:7px}.total{font-size:20px;font-weight:900}.primary{border:0;background:var(--g);color:#fff;padding:12px 15px;border-radius:10px;font-weight:800;width:100%}.secondary{border:0;background:#edf1ef;color:#22332c;padding:12px 15px;border-radius:10px;font-weight:800}
+.form label{display:block;font-weight:700;font-size:13px;margin:12px 0 6px}.form input,.form textarea,.form select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px}.form textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px}.orderLine{display:flex;justify-content:space-between;gap:10px;margin:7px 0}.status{padding:5px 8px;border-radius:8px;background:#e8f7ef;color:var(--g);font-size:11px;font-weight:700}.status.pending{background:#fff4d6;color:#7a5a00}.status.cancelled{background:#ffe6e8;color:#a81e2c}
+.bank{background:#f4faf7;border:1px solid #d5eadf;border-radius:12px;padding:13px}.copy{border:0;background:#fff;border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:11px}
+.login{max-width:430px;margin:70px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}.login h2{margin-top:0}.msg{font-size:13px;color:var(--muted);margin:9px 0}.error{color:#b42318;background:#fff0ef;padding:9px;border-radius:8px;font-size:13px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:25}.bottomIn{max-width:700px;width:100%;display:flex}.bottom button{flex:1;border:0;background:#fff;padding:9px 3px;color:#5f6b65;font-size:11px}.bottom button.active{color:var(--g);font-weight:900}
+.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:#13251f;color:#fff;padding:11px 15px;border-radius:10px;z-index:100;display:none}
+@media(max-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:650px){.head{flex-wrap:wrap}.logo{font-size:19px}.search{order:3;flex-basis:100%}.grid{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:25px}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="app" class="hidden">
+<header><div class="head">
+<div class="logo">🛍️ Saad Traders <span class="tag">Fresh Rashan • Easy Ordering</span></div>
+<div class="search"><span>🔎</span><input id="search" placeholder="Search rice, atta, oil, dal..." oninput="renderProducts()"></div>
+<button class="headBtn" onclick="openOrders()">📦 Orders</button>
+<button class="headBtn iconBtn" onclick="openCart()">🛒 <span id="cartCount" class="badge">0</span></button>
+<button class="headBtn" onclick="logout()">Logout</button>
+</div></header>
+
+<div class="hero"><div class="heroIn">
+<h1>Daily Rashan, Delivered Simply</h1>
+<p>Order groceries, receive your invoice and payment details in one place.</p>
+</div></div>
+
+<main class="wrap">
+<div class="cats" id="cats"></div>
+<div class="sectionTitle"><h2>Rashan Products</h2><span id="productCount" class="tag"></span></div>
+<div id="products" class="grid"></div>
+</main>
+
+<div class="bottom"><div class="bottomIn">
+<button class="active" onclick="goHome()">🏠<br>Home</button>
+<button onclick="openOrders()">📦<br>Orders</button>
+<button onclick="openCart()">🛒<br>Cart</button>
+<button onclick="openAccount()">👤<br>Account</button>
+</div></div>
+</div>
+
+<div id="login" class="login">
+<h2>Welcome to Saad Traders</h2>
+<p class="msg">Login with your mobile number. We'll send a one-time OTP.</p>
+<div id="loginMsg"></div>
+<div id="phoneBox">
+<label>Mobile Number</label>
+<input id="phone" inputmode="tel" maxlength="10" placeholder="10 digit mobile number">
+<button class="primary" style="margin-top:14px" onclick="sendOtp()">Send OTP</button>
+</div>
+<div id="otpBox" class="hidden">
+<label>Enter OTP</label>
+<input id="otp" inputmode="numeric" maxlength="6" placeholder="6 digit OTP">
+<button class="primary" style="margin-top:14px" onclick="verifyOtp()">Verify & Continue</button>
+<button class="secondary" style="margin-top:8px" onclick="backPhone()">Change number</button>
+</div>
+</div>
+
+<div id="cartDrawer" class="drawer">
+<div class="sheet"><div class="sheetHead"><h2>Your Cart</h2><button class="close" onclick="closeCart()">✕</button></div>
+<div id="cartItems"></div><div class="card"><div class="orderLine"><span>Subtotal</span><b id="cartTotal">₹0</b></div>
+<button class="primary" onclick="checkout()">Proceed to Checkout</button></div></div>
+</div>
+
+<div id="checkoutDrawer" class="drawer">
+<div class="sheet"><div class="sheetHead"><h2>Checkout</h2><button class="close" onclick="closeCheckout()">✕</button></div>
+<div class="form">
+<label>Full Name</label><input id="cName" placeholder="Your name">
+<label>Phone</label><input id="cPhone" readonly>
+<label>Address</label><textarea id="cAddress" placeholder="House / shop, street, area"></textarea>
+<div class="row"><div><label>City</label><input id="cCity" value="Jaunpur"></div><div><label>Pincode</label><input id="cPin" inputmode="numeric"></div></div>
+<div class="row"><div><label>State</label><input id="cState" value="Uttar Pradesh"></div><div><label>GSTIN (optional)</label><input id="cGstin"></div></div>
+<label>Order Note (optional)</label><textarea id="cNote" placeholder="Any delivery instruction"></textarea>
+<div class="card"><div class="orderLine"><span>Items</span><b id="checkoutSubtotal">₹0</b></div><div class="orderLine"><span>Delivery/other charges</span><b>₹0</b></div><hr><div class="orderLine"><span>Total</span><b id="checkoutTotal">₹0</b></div></div>
+<button class="primary" onclick="placeOrder()">Place Order & Create Invoice</button>
+</div></div>
+</div>
+
+<div id="ordersDrawer" class="drawer">
+<div class="sheet"><div class="sheetHead"><h2>My Orders</h2><button class="close" onclick="closeOrders()">✕</button></div>
+<div id="ordersList"></div></div>
+</div>
+
+<div id="accountDrawer" class="drawer">
+<div class="sheet"><div class="sheetHead"><h2>My Account</h2><button class="close" onclick="closeAccount()">✕</button></div>
+<div class="card"><h3 id="accountName">Customer</h3><p id="accountPhone" class="msg"></p></div>
+<div id="paymentBox"></div>
+<button class="secondary" onclick="logout()">Logout</button>
+</div>
+</div>
+
+<div id="invoiceDrawer" class="drawer">
+<div class="sheet"><div class="sheetHead"><h2>Invoice</h2><button class="close" onclick="closeInvoice()">✕</button></div>
+<div id="invoiceView"></div>
+</div>
+</div>
+
+<div id="paymentDrawer" class="drawer">
+<div class="sheet"><div class="sheetHead"><h2>Payment</h2><button class="close" onclick="closePayment()">✕</button></div>
+<div id="paymentView"></div>
+</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL="https://bzyonildigzsytuprfrh.supabase.co";
+const SUPABASE_KEY="sb_publishable_bHzySPhRmTgA_2gaSdeaNw_KdMq-hBL";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const BUCKET="product-images";
+
+let products=[],categories=[],cart=[],user=null,currentOrder=null;
+
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:0,maximumFractionDigits:2});
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const imgUrl=p=>{
+ if(!p)return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='500' height='500'><rect width='100%' height='100%' fill='#f3f6f4'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' font-size='70'>🛒</text></svg>");
+ if(/^https?:\/\//i.test(p))return p;
+ return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;
+};
+function toast(t){const x=document.getElementById("toast");x.textContent=t;x.style.display="block";setTimeout(()=>x.style.display="none",2600)}
+function showLogin(){document.getElementById("login").classList.remove("hidden");document.getElementById("app").classList.add("hidden")}
+function showApp(){document.getElementById("login").classList.add("hidden");document.getElementById("app").classList.remove("hidden")}
+function normalizePhone(v){v=(v||"").replace(/\D/g,"");return v.length===10?"+91"+v:v.startsWith("91")?"+91"+v:""}
+async function sendOtp(){
+ const phone=normalizePhone(document.getElementById("phone").value);
+ if(!phone){document.getElementById("loginMsg").innerHTML='<div class="error">Enter a valid 10 digit Indian mobile number.</div>';return}
+ const {error}=await sb.auth.signInWithOtp({phone});
+ if(error){document.getElementById("loginMsg").innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+ document.getElementById("phoneBox").classList.add("hidden");document.getElementById("otpBox").classList.remove("hidden");
+ document.getElementById("loginMsg").innerHTML='<div class="msg">OTP sent to '+esc(phone)+'.</div>';
+}
+function backPhone(){document.getElementById("otpBox").classList.add("hidden");document.getElementById("phoneBox").classList.remove("hidden")}
+async function verifyOtp(){
+ const phone=normalizePhone(document.getElementById("phone").value),token=document.getElementById("otp").value.trim();
+ const {data,error}=await sb.auth.verifyOtp({phone,token,type:"sms"});
+ if(error){document.getElementById("loginMsg").innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+ user=data.user;await ensureProfile();showApp();await loadStore();
+}
+async function ensureProfile(){
+ if(!user)return;
+ const {data}=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();
+ if(!data){
+   await sb.from("profiles").insert({id:user.id,full_name:"",phone:user.phone||"",role:"customer"});
+ } else if(data.role!=="customer" && data.role!=="admin"){
+   await sb.auth.signOut();showLogin();alert("This account is not a customer account.");return;
+ }
+}
+async function init(){
+ const {data}=await sb.auth.getSession();user=data.session?.user||null;
+ if(user){await ensureProfile();showApp();await loadStore()}else showLogin();
+ sb.auth.onAuthStateChange(async(_e,s)=>{if(s?.user){user=s.user}else user=null});
+}
+async function loadStore(){
+ const [p,c]=await Promise.all([
+  sb.from("products").select("id,name,sku,category_id,mrp,selling_price,gst_rate,stock,unit,description,image_path,is_active").eq("is_active",true).order("name"),
+  sb.from("categories").select("id,name,image_path").eq("is_active",true).order("sort_order").order("name")
+ ]);
+ if(p.error){alert("Products error: "+p.error.message);return}
+ products=p.data||[];categories=c.data||[];renderCats();renderProducts();updateCart();
+ const prof=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();
+ if(prof.data){document.getElementById("accountName").textContent=prof.data.full_name||"Customer";document.getElementById("accountPhone").textContent=prof.data.phone||user.phone||""}
+}
+function renderCats(){
+ document.getElementById("cats").innerHTML='<button class="cat active" onclick="filterCat(null,this)">All</button>'+
+ categories.map(c=>'<button class="cat" onclick="filterCat(\''+c.id+'\',this)">'+esc(c.name)+'</button>').join("");
+}
+let activeCat=null;
+function filterCat(id,el){activeCat=id;document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));el.classList.add("active");renderProducts()}
+function renderProducts(){
+ const q=(document.getElementById("search").value||"").toLowerCase().trim();
+ const list=products.filter(p=>(!activeCat||p.category_id===activeCat)&&(!q||[p.name,p.sku,p.description].join(" ").toLowerCase().includes(q)));
+ document.getElementById("productCount").textContent=list.length+" items";
+ document.getElementById("products").innerHTML=list.map(p=>{
+  const disabled=Number(p.stock)<=0;
+  return '<article class="product"><img class="pic" src="'+imgUrl(p.image_path)+'" alt="'+esc(p.name)+'" onerror="this.src=\''+imgUrl("")+'\'">'+
+  '<div class="pname">'+esc(p.name)+'</div><div class="unit">'+esc(p.unit)+'</div>'+
+  '<div class="price">'+money(p.selling_price)+' <span class="mrp">'+(Number(p.mrp)>Number(p.selling_price)?money(p.mrp):"")+'</span></div>'+
+  '<div class="stock">'+(disabled?"Out of stock":Number(p.stock)+" "+esc(p.unit)+" available")+'</div>'+
+  '<button class="add" '+(disabled?"disabled":"")+" onclick='addToCart(\""+p.id+"\")'>"+(disabled?"Out of Stock":"+ Add to Cart")+"</button></article>"
+ }).join("")||'<div class="card" style="grid-column:1/-1">No products found.</div>';
+}
+function addToCart(id){const p=products.find(x=>x.id===id);if(!p)return;const row=cart.find(x=>x.id===id);if(row)row.qty=Math.min(row.qty+1,Number(p.stock));else cart.push({id,qty:1});updateCart();toast("Added to cart")}
+function updateCart(){document.getElementById("cartCount").textContent=cart.reduce((a,x)=>a+x.qty,0);renderCart()}
+function renderCart(){
+ const el=document.getElementById("cartItems");
+ if(!cart.length){el.innerHTML='<div class="card">Your cart is empty.</div>';document.getElementById("cartTotal").textContent="₹0";return}
+ let total=0;
+ el.innerHTML=cart.map(row=>{const p=products.find(x=>x.id===row.id);if(!p)return"";const line=Number(p.selling_price)*row.qty;total+=line;
+ return '<div class="cartRow"><img src="'+imgUrl(p.image_path)+'"><div><b>'+esc(p.name)+'</b><div class="unit">'+money(p.selling_price)+' × '+row.qty+'</div></div><div><div class="qty"><button onclick="changeQty(\''+p.id+'\',-1)">−</button><b>'+row.qty+'</b><button onclick="changeQty(\''+p.id+'\',1)">+</button></div><button class="copy" onclick="removeCart(\''+p.id+'\')">Remove</button></div></div>'}).join("");
+ document.getElementById("cartTotal").textContent=money(total);
+}
+function changeQty(id,d){const r=cart.find(x=>x.id===id),p=products.find(x=>x.id===id);if(!r)return;r.qty+=d;if(r.qty<=0)cart=cart.filter(x=>x.id!==id);else r.qty=Math.min(r.qty,Number(p.stock));updateCart()}
+function removeCart(id){cart=cart.filter(x=>x.id!==id);updateCart()}
+function openCart(){document.getElementById("cartDrawer").classList.add("show");renderCart()}function closeCart(){document.getElementById("cartDrawer").classList.remove("show")}
+async function checkout(){
+ if(!cart.length){toast("Cart is empty");return}
+ closeCart();document.getElementById("checkoutDrawer").classList.add("show");
+ const prof=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();const p=prof.data||{};
+ document.getElementById("cName").value=p.full_name||"";document.getElementById("cPhone").value=p.phone||user.phone||"";
+ let total=cart.reduce((a,r)=>a+Number(products.find(p=>p.id===r.id).selling_price)*r.qty,0);document.getElementById("checkoutSubtotal").textContent=money(total);document.getElementById("checkoutTotal").textContent=money(total);
+ const ad=await sb.from("addresses").select("*").eq("user_id",user.id).eq("is_default",true).maybeSingle();if(ad.data){document.getElementById("cAddress").value=ad.data.address_line1+(ad.data.address_line2?" "+ad.data.address_line2:"");document.getElementById("cCity").value=ad.data.city;document.getElementById("cState").value=ad.data.state;document.getElementById("cPin").value=ad.data.pincode;document.getElementById("cGstin").value=ad.data.gstin||""}
+}
+function closeCheckout(){document.getElementById("checkoutDrawer").classList.remove("show")}
+async function placeOrder(){
+ if(!cart.length)return;const name=document.getElementById("cName").value.trim(),address=document.getElementById("cAddress").value.trim(),city=document.getElementById("cCity").value.trim(),state=document.getElementById("cState").value.trim(),pin=document.getElementById("cPin").value.trim();
+ if(!name||!address||!city||!pin){toast("Please complete your delivery address");return}
+ let subtotal=0;for(const r of cart){const p=products.find(x=>x.id===r.id);if(!p||r.qty>Number(p.stock)){toast("Some item is out of stock");return}subtotal+=Number(p.selling_price)*r.qty}
+ const {data:order,error}=await sb.from("orders").insert({customer_id:user.id,customer_name:name,customer_phone:document.getElementById("cPhone").value,customer_gstin:document.getElementById("cGstin").value.trim()||null,delivery_address:address,delivery_city:city,delivery_state:state,delivery_pincode:pin,subtotal,cgst:0,sgst:0,igst:0,freight_charge:0,labour_charge:0,bori_pati_charge:0,other_charge:0,discount:0,grand_total:subtotal,payment_status:"pending",order_status:"new",notes:document.getElementById("cNote").value.trim()||null}).select("*").single();
+ if(error){toast(error.message);return}
+ const items=cart.map(r=>{const p=products.find(x=>x.id===r.id);return{order_id:order.id,product_id:p.id,product_name:p.name,sku:p.sku,quantity:r.qty,unit:p.unit,unit_price:p.selling_price,purchase_price:0,gst_rate:p.gst_rate||0,gst_amount:0,labour_charge:0,bori_pati_charge:0,line_total:Number(p.selling_price)*r.qty}});
+ const ir=await sb.from("order_items").insert(items);if(ir.error){toast(ir.error.message);return}
+ const inv=await sb.from("invoices").insert({order_id:order.id,subtotal, tax_amount:0,freight_charge:0,labour_charge:0,bori_pati_charge:0,other_charge:0,discount:0,grand_total:subtotal}).select("*").single();
+ if(inv.error){toast("Order created, but invoice failed: "+inv.error.message);return}
+ await sb.from("addresses").update({is_default:false}).eq("user_id",user.id);
+ await sb.from("addresses").insert({user_id:user.id,address_type:"shipping",full_name:name,phone:document.getElementById("cPhone").value,address_line1:address,city,state,pincode:pin,gstin:document.getElementById("cGstin").value.trim()||null,is_default:true});
+ await sb.from("profiles").upsert({id:user.id,full_name:name,phone:document.getElementById("cPhone").value,role:"customer"});
+ cart=[];updateCart();closeCheckout();toast("Order placed and invoice created");await openOrders();showInvoice(inv.data,order);
+}
+async function openOrders(){document.getElementById("ordersDrawer").classList.add("show");const {data,error}=await sb.from("orders").select("*").eq("customer_id",user.id).order("created_at",{ascending:false});if(error){document.getElementById("ordersList").innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+ if(!data?.length){document.getElementById("ordersList").innerHTML='<div class="card">No orders yet.</div>';return}
+ document.getElementById("ordersList").innerHTML=data.map(o=>'<div class="card"><div class="orderTop"><div><b>Order #'+o.order_number+'</b><div class="msg">'+new Date(o.created_at).toLocaleString("en-IN")+'</div></div><span class="status '+(o.order_status==="cancelled"?"cancelled":o.payment_status==="pending"?"pending":"")+'">'+esc(o.order_status)+'</span></div><div class="orderLine"><span>Total</span><b>'+money(o.grand_total)+'</b></div><div class="actions"><button class="secondary" onclick="viewOrder(\''+o.id+'\')">View Order</button><button class="primary" style="width:auto" onclick="payOrder(\''+o.id+'\','+Number(o.grand_total)+')">Payment / Bank Details</button></div></div>').join("");
+}
+function closeOrders(){document.getElementById("ordersDrawer").classList.remove("show")}
+async function viewOrder(id){const {data:o}=await sb.from("orders").select("*").eq("id",id).single();const {data:items}=await sb.from("order_items").select("*").eq("order_id",id);const {data:inv}=await sb.from("invoices").select("*").eq("order_id",id).maybeSingle();showInvoice(inv,o,items)}
+function showInvoice(inv,o,items=[]){if(!o)return;document.getElementById("invoiceDrawer").classList.add("show");document.getElementById("invoiceView").innerHTML='<div class="card"><h2>Saad Traders</h2><p class="msg">Invoice #'+(inv?.invoice_number||"—")+'</p><div class="orderLine"><span>Order</span><b>#'+o.order_number+'</b></div><div class="orderLine"><span>Date</span><b>'+new Date(o.created_at).toLocaleDateString("en-IN")+'</b></div><hr>'+((items||[]).map(i=>'<div class="orderLine"><span>'+esc(i.product_name)+' × '+i.quantity+'</span><b>'+money(i.line_total)+'</b></div>').join(""))+'<hr><div class="orderLine"><span>Total</span><b>'+money(o.grand_total)+'</b></div><p class="msg">Delivery: '+esc(o.delivery_address)+', '+esc(o.delivery_city)+' - '+esc(o.delivery_pincode)+'</p><button class="primary" onclick="window.print()">Print / Save Invoice</button></div>'}
+function closeInvoice(){document.getElementById("invoiceDrawer").classList.remove("show")}
+async function payOrder(id,amount){currentOrder={id,amount};document.getElementById("paymentDrawer").classList.add("show");const {data}=await sb.from("payment_settings").select("*").eq("is_active",true).limit(1).maybeSingle();document.getElementById("paymentView").innerHTML='<div class="card"><h3>Pay '+money(amount)+'</h3>'+(data?'<div class="bank"><b>'+esc(data.business_name)+'</b><p>UPI: '+esc(data.upi_id||"Not available")+' <button class="copy" onclick="copyText(\''+esc(data.upi_id||"")+'\')">Copy</button></p><p>Bank: '+esc(data.bank_name||"")+'</p><p>Account: '+esc(data.account_number||"")+'</p><p>IFSC: '+esc(data.ifsc_code||"")+'</p><p>Holder: '+esc(data.account_holder||"")+'</p><p>'+esc(data.payment_instructions||"")+'</p></div>':'<p>Bank details are not available yet.</p>')+'<label style="display:block;margin-top:14px;font-weight:700">Transaction / UTR Number</label><input id="utr" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:9px" placeholder="Enter UTR after payment"><button class="primary" style="margin-top:12px" onclick="submitPayment()">Submit Payment</button></div>'}
+function closePayment(){document.getElementById("paymentDrawer").classList.remove("show")}
+async function submitPayment(){const ref=document.getElementById("utr").value.trim();if(!ref){toast("Enter UTR / transaction reference");return}const {error}=await sb.from("payments").insert({order_id:currentOrder.id,customer_id:user.id,amount:currentOrder.amount,method:"bank_transfer",transaction_reference:ref,status:"pending"});if(error){toast(error.message);return}await sb.from("orders").update({payment_status:"submitted"}).eq("id",currentOrder.id).eq("customer_id",user.id);toast("Payment submitted for verification");closePayment();openOrders()}
+function copyText(t){navigator.clipboard?.writeText(t);toast("Copied")}
+async function openAccount(){document.getElementById("accountDrawer").classList.add("show");const {data}=await sb.from("payment_settings").select("*").eq("is_active",true).limit(1).maybeSingle();document.getElementById("paymentBox").innerHTML=data?'<div class="card"><h3>Payment Details</h3><div class="bank"><b>'+esc(data.business_name)+'</b><p>UPI: '+esc(data.upi_id||"")+'</p><p>'+esc(data.bank_name||"")+'</p><p>A/C: '+esc(data.account_number||"")+'</p><p>IFSC: '+esc(data.ifsc_code||"")+'</p></div></div>':""}
+function closeAccount(){document.getElementById("accountDrawer").classList.remove("show")}
+function goHome(){document.querySelector(".drawer.show")?.classList.remove("show");window.scrollTo({top:0,behavior:"smooth"})}
+async function logout(){await sb.auth.signOut();cart=[];showLogin();backPhone()}
+init();
+</script>
+</body>
+</html>
