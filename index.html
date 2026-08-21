@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#087f5b">
+<meta name="description" content="Saad Traders - Online Grocery & Household Store">
+<title>Saad Traders — Online Store</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f7f8;color:#17202a}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+:root{--green:#087f5b;--green2:#0b996e;--light:#e8f6f0;--border:#e3e7e9;--danger:#d63031;--orange:#f39c12}
+.top{background:#087f5b;color:#fff;font-size:12px;padding:7px 15px;text-align:center}
+.header{background:#fff;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px #0001}
+.header-inner{max-width:1250px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:15px}
+.logo{min-width:185px;color:var(--green);font-size:23px;font-weight:900}
+.logo small{display:block;color:#777;font-size:10px;margin-top:2px}
+.searchbox{flex:1;display:flex;max-width:650px}
+.searchbox input{width:100%;border:1px solid #d6dcdf;border-right:0;border-radius:9px 0 0 9px;padding:12px 14px;outline:none}
+.searchbox button{border:0;background:var(--green);color:#fff;padding:0 18px;border-radius:0 9px 9px 0;font-weight:700}
+.head-actions{display:flex;gap:8px;margin-left:auto}
+.iconbtn{border:1px solid #dfe4e6;background:#fff;border-radius:9px;padding:10px 12px;font-weight:700}
+.iconbtn:hover{background:#f3f6f6}
+.cartbtn{position:relative;background:var(--green);color:#fff;border:0;border-radius:9px;padding:10px 14px;font-weight:800}
+.cartcount{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:2px 5px;border-radius:20px;background:#d63031;color:#fff;font-size:11px;display:flex;justify-content:center;align-items:center}
+.container{max-width:1250px;margin:auto;padding:16px}
+.hero{background:linear-gradient(135deg,#087f5b,#0b996e);color:#fff;border-radius:16px;padding:30px;margin-bottom:18px;overflow:hidden;position:relative}
+.hero h1{font-size:34px;margin:0 0 9px;max-width:650px}
+.hero p{margin:0;line-height:1.5;opacity:.93;max-width:650px}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.badge{background:#fff2;border:1px solid #fff4;padding:8px 11px;border-radius:20px;font-size:12px;font-weight:700}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 12px}
+.section-title h2{margin:0;font-size:20px}
+.category-row{display:flex;gap:10px;overflow:auto;padding-bottom:4px}
+.category{min-width:115px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:11px;text-align:center;font-weight:700;color:#333}
+.category.active{border-color:var(--green);background:var(--light);color:var(--green)}
+.category-img{width:58px;height:58px;border-radius:50%;object-fit:cover;background:#f3f4f4;margin:auto auto 7px;display:block}
+.category-placeholder{width:58px;height:58px;border-radius:50%;background:#eef2f1;display:flex;align-items:center;justify-content:center;margin:auto auto 7px;font-size:23px}
+.products{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.product{background:#fff;border:1px solid var(--border);border-radius:13px;overflow:hidden;min-width:0;transition:.15s}
+.product:hover{transform:translateY(-2px);box-shadow:0 6px 18px #0000000d}
+.product-image{height:190px;background:#fafafa;position:relative;display:flex;align-items:center;justify-content:center}
+.product-image img{width:100%;height:100%;object-fit:contain}
+.noimage{color:#aaa;font-size:13px}
+.stock-tag{position:absolute;left:8px;top:8px;border-radius:6px;padding:5px 7px;font-size:10px;font-weight:800}
+.instock{background:#dff7ea;color:#087f5b}
+.lowstock{background:#fff3cd;color:#8a6700}
+.outstock{background:#ffe0e0;color:#c0392b}
+.product-body{padding:12px}
+.product-name{font-weight:800;line-height:1.3;min-height:35px}
+.product-meta{font-size:11px;color:#777;margin-top:5px;min-height:15px}
+.price-row{display:flex;align-items:center;gap:7px;margin-top:9px}
+.price{color:var(--green);font-size:18px;font-weight:900}
+.mrp{color:#999;font-size:12px;text-decoration:line-through}
+.addbtn{width:100%;border:0;background:var(--green);color:#fff;padding:9px;border-radius:8px;margin-top:10px;font-weight:800}
+.addbtn:hover{background:var(--green2)}
+.addbtn.out{background:#e5e7e9;color:#777}
+.empty{background:#fff;border:1px solid var(--border);border-radius:12px;padding:35px;text-align:center;color:#777}
+.footer{background:#17202a;color:#fff;margin-top:35px;padding:30px 16px}
+.footer-inner{max-width:1250px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:25px}
+.footer h3{margin-top:0}
+.footer p{color:#cbd0d3;font-size:13px;line-height:1.6}
+.overlay{position:fixed;inset:0;background:#0008;z-index:100;display:none}
+.overlay.show{display:block}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(460px,100%);background:#fff;z-index:101;transform:translateX(100%);transition:.25s;display:flex;flex-direction:column}
+.drawer.show{transform:translateX(0)}
+.drawer-head{padding:17px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.drawer-head h2{margin:0}
+.close{border:0;background:#eee;width:35px;height:35px;border-radius:50%;font-size:20px}
+.cart-items{flex:1;overflow:auto;padding:12px}
+.cart-item{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #eee}
+.cart-img{width:70px;height:70px;object-fit:contain;background:#fafafa;border-radius:8px}
+.cart-info{flex:1}
+.cart-name{font-weight:800;font-size:14px}
+.cart-price{color:var(--green);font-weight:800;margin-top:5px}
+.qty{display:flex;align-items:center;gap:8px;margin-top:8px}
+.qty button{width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:6px;font-weight:900}
+.remove{border:0;background:none;color:#d63031;font-size:11px;margin-left:auto}
+.cart-bottom{border-top:1px solid var(--border);padding:15px}
+.totalrow{display:flex;justify-content:space-between;margin:7px 0;font-size:14px}
+.grand{font-size:19px;font-weight:900;padding-top:8px;border-top:1px solid #eee}
+.checkout{width:100%;background:var(--green);color:#fff;border:0;padding:13px;border-radius:9px;font-weight:900;margin-top:10px}
+.modal{position:fixed;inset:0;background:#0008;z-index:200;display:none;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}
+.modalbox{background:#fff;width:min(650px,100%);max-height:94vh;overflow:auto;border-radius:15px;padding:20px}
+.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.modalhead h2{margin:0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;font-weight:800}
+.field input,.field textarea,.field select{width:100%;border:1px solid #d1d5db;border-radius:8px;padding:11px;outline:none;background:#fff}
+.field textarea{min-height:80px;resize:vertical}
+.required{color:#d63031}
+.formactions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.btn{border:0;border-radius:8px;padding:10px 14px;font-weight:800}
+.primary{background:var(--green);color:#fff}
+.secondary{background:#e9ecef;color:#222}
+.auth-tabs{display:flex;gap:8px;margin-bottom:15px}
+.auth-tab{flex:1;border:0;background:#eee;padding:10px;border-radius:8px;font-weight:800}
+.auth-tab.active{background:var(--green);color:#fff}
+.account{display:none}
+.account.show{display:block}
+.order-card{border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px}
+.order-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.order-number{font-weight:900}
+.status{display:inline-block;padding:5px 8px;border-radius:6px;background:#e9f5ef;color:var(--green);font-size:11px;font-weight:800}
+.order-items-mini{margin-top:10px;font-size:12px;color:#666;line-height:1.6}
+.order-total{margin-top:8px;font-weight:900}
+.successbox{text-align:center;padding:15px}
+.success-icon{width:65px;height:65px;border-radius:50%;background:#dff7ea;color:var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:30px;font-weight:900}
+.order-success-number{font-size:23px;font-weight:900;color:var(--green);margin:8px 0}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,100px);background:#222;color:#fff;padding:12px 18px;border-radius:9px;z-index:9999;transition:.25s;max-width:90%;text-align:center}
+.toast.show{transform:translate(-50%,0)}
+.toast.success{background:var(--green)}
+.toast.error{background:#d63031}
+.loading{padding:35px;text-align:center;color:#777}
+.profile-info{background:#f7f9f9;border-radius:10px;padding:12px;margin-bottom:14px}
+.profile-info strong{display:block}
+.small{font-size:11px;color:#777}
+@media(max-width:1050px){.products{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:800px){
+.header-inner{flex-wrap:wrap}
+.logo{min-width:auto}
+.searchbox{order:3;flex-basis:100%;max-width:none}
+.products{grid-template-columns:repeat(3,1fr)}
+.footer-inner{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+.container{padding:10px}
+.top{font-size:10px}
+.header-inner{padding:10px}
+.logo{font-size:19px}
+.head-actions{gap:5px}
+.iconbtn{padding:9px}
+.cartbtn{padding:9px}
+.hero{padding:22px 18px;border-radius:12px}
+.hero h1{font-size:25px}
+.products{grid-template-columns:repeat(2,1fr);gap:8px}
+.product-image{height:145px}
+.product-body{padding:9px}
+.product-name{font-size:13px}
+.price{font-size:16px}
+.addbtn{font-size:12px}
+.grid{grid-template-columns:1fr}
+.field.full{grid-column:auto}
+.footer-inner{grid-template-columns:1fr}
+.modalbox{padding:15px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+Welcome to Saad Traders • Quality products • Easy ordering
+</div>
+
+<header class="header">
+<div class="header-inner">
+
+<div class="logo">
+Saad Traders
+<small>Online Grocery & Household Store</small>
+</div>
+
+<div class="searchbox">
+<input id="search" type="search" placeholder="Search products, brands, SKU..." autocomplete="off">
+<button onclick="renderProducts()">Search</button>
+</div>
+
+<div class="head-actions">
+<button id="accountBtn" class="iconbtn" onclick="openAccount()">Account</button>
+
+<button class="cartbtn" onclick="openCart()">
+🛒 Cart
+<span id="cartCount" class="cartcount">0</span>
+</button>
+</div>
+
+</div>
+</header>
+
+<main class="container">
+
+<section class="hero">
+<h1>Everything you need, from Saad Traders.</h1>
+<p>Shop groceries, cooking oils and household essentials with simple ordering and reliable stock availability.</p>
+
+<div class="hero-badges">
+<span class="badge">✓ Live Product Stock</span>
+<span class="badge">✓ Secure Checkout</span>
+<span class="badge">✓ Order Tracking</span>
+</div>
+</section>
+
+<section>
+<div class="section-title">
+<h2>Shop by Category</h2>
+</div>
+
+<div id="categories" class="category-row">
+<div class="loading">Loading categories...</div>
+</div>
+</section>
+
+<section>
+<div class="section-title">
+<h2 id="productsTitle">All Products</h2>
+
+<select id="brandFilter" onchange="renderProducts()" style="padding:9px;border:1px solid #ddd;border-radius:8px">
+<option value="">All Brands</option>
+</select>
+</div>
+
+<div id="products" class="products">
+<div class="loading">Loading products...</div>
+</div>
+</section>
+
+</main>
+
+<footer class="footer">
+<div class="footer-inner">
+
+<div>
+<h3>Saad Traders</h3>
+<p>Your trusted local store for groceries, cooking oils and daily household products.</p>
+</div>
+
+<div>
+<h3>Customer</h3>
+<p>Easy ordering</p>
+<p>Order history</p>
+<p>Live stock availability</p>
+</div>
+
+<div>
+<h3>Need Help?</h3>
+<p>Contact Saad Traders for order assistance.</p>
+<p>9044580975</p>
+</div>
+
+</div>
+</footer>
+
+<div id="overlay" class="overlay" onclick="closeCart()"></div>
+
+<aside id="cartDrawer" class="drawer">
+
+<div class="drawer-head">
+<h2>Your Cart</h2>
+<button class="close" onclick="closeCart()">×</button>
+</div>
+
+<div id="cartItems" class="cart-items"></div>
+
+<div class="cart-bottom">
+
+<div class="totalrow">
+<span>Subtotal</span>
+<strong id="cartSubtotal">₹0.00</strong>
+</div>
+
+<div class="totalrow">
+<span>Items</span>
+<strong id="cartItemsCount">0</strong>
+</div>
+
+<div class="totalrow grand">
+<span>Total</span>
+<strong id="cartGrand">₹0.00</strong>
+</div>
+
+<button class="checkout" onclick="startCheckout()">Proceed to Checkout</button>
+
+</div>
+</aside>
+
+<div id="accountModal" class="modal">
+
+<div class="modalbox">
+
+<div class="modalhead">
+<h2>My Account</h2>
+<button class="close" onclick="closeModal('accountModal')">×</button>
+</div>
+
+<div id="loggedOutAccount">
+
+<div class="auth-tabs">
+<button id="loginTab" class="auth-tab active" onclick="switchAuth('login')">Login</button>
+<button id="signupTab" class="auth-tab" onclick="switchAuth('signup')">Create Account</button>
+</div>
+
+<div id="loginForm">
+
+<div class="field">
+<label>Email</label>
+<input id="loginEmail" type="email" autocomplete="email">
+</div>
+
+<div class="field" style="margin-top:10px">
+<label>Password</label>
+<input id="loginPassword" type="password" autocomplete="current-password">
+</div>
+
+<button class="btn primary" style="width:100%;margin-top:15px" onclick="customerLogin()">Login</button>
+
+</div>
+
+<div id="signupForm" style="display:none">
+
+<div class="grid">
+
+<div class="field">
+<label>Full Name <span class="required">*</span></label>
+<input id="signupName" autocomplete="name">
+</div>
+
+<div class="field">
+<label>Phone <span class="required">*</span></label>
+<input id="signupPhone" type="tel" inputmode="numeric" autocomplete="tel">
+</div>
+
+<div class="field full">
+<label>Email <span class="required">*</span></label>
+<input id="signupEmail" type="email" autocomplete="email">
+</div>
+
+<div class="field">
+<label>Password <span class="required">*</span></label>
+<input id="signupPassword" type="password" minlength="6" autocomplete="new-password">
+</div>
+
+<div class="field">
+<label>Confirm Password <span class="required">*</span></label>
+<input id="signupConfirm" type="password" autocomplete="new-password">
+</div>
+
+</div>
+
+<button id="signupBtn" class="btn primary" style="width:100%;margin-top:15px" onclick="customerSignup()">
+Create Account
+</button>
+
+</div>
+
+<p id="authMessage" style="font-size:12px;color:#d63031"></p>
+
+</div>
+
+<div id="loggedInAccount" class="account">
+
+<div class="profile-info">
+<strong id="profileName">Customer</strong>
+<span id="profileEmail" class="small"></span>
+<span id="profilePhone" class="small"></span>
+</div>
+
+<button class="btn primary" style="width:100%;margin-bottom:9px" onclick="openOrders()">My Orders</button>
+
+<button class="btn secondary" style="width:100%" onclick="customerLogout()">Logout</button>
+
+</div>
+
+</div>
+</div>
+
+<div id="checkoutModal" class="modal">
+
+<div class="modalbox">
+
+<div class="modalhead">
+<h2>Checkout</h2>
+<button class="close" onclick="closeModal('checkoutModal')">×</button>
+</div>
+
+<div class="grid">
+
+<div class="field">
+<label>Full Name <span class="required">*</span></label>
+<input id="customerName" autocomplete="name">
+</div>
+
+<div class="field">
+<label>Phone <span class="required">*</span></label>
+<input id="customerPhone" type="tel" inputmode="numeric" autocomplete="tel">
+</div>
+
+<div class="field full">
+<label>Delivery Address <span class="required">*</span></label>
+<textarea id="deliveryAddress" placeholder="House / shop number, street, locality"></textarea>
+</div>
+
+<div class="field">
+<label>City</label>
+<input id="deliveryCity">
+</div>
+
+<div class="field">
+<label>State</label>
+<input id="deliveryState" value="Uttar Pradesh">
+</div>
+
+<div class="field">
+<label>Pincode</label>
+<input id="deliveryPincode" inputmode="numeric">
+</div>
+
+<div class="field">
+<label>GSTIN</label>
+<input id="customerGstin" placeholder="Optional">
+</div>
+
+<div class="field">
+<label>Freight Charge ₹</label>
+<input id="freightCharge" type="number" min="0" step="0.01" value="0">
+</div>
+
+<div class="field">
+<label>Other Charge ₹</label>
+<input id="otherCharge" type="number" min="0" step="0.01" value="0">
+</div>
+
+<div class="field">
+<label>Discount ₹</label>
+<input id="discount" type="number" min="0" step="0.01" value="0">
+</div>
+
+<div class="field full">
+<label>Order Notes</label>
+<textarea id="orderNotes" placeholder="Optional instructions"></textarea>
+</div>
+
+</div>
+
+<div style="background:#f7f9f9;padding:13px;border-radius:10px;margin-top:15px">
+
+<div class="totalrow">
+<span>Cart Subtotal</span>
+<strong id="checkoutSubtotal">₹0.00</strong>
+</div>
+
+<div class="totalrow">
+<span>Freight</span>
+<strong id="checkoutFreight">₹0.00</strong>
+</div>
+
+<div class="totalrow">
+<span>Other</span>
+<strong id="checkoutOther">₹0.00</strong>
+</div>
+
+<div class="totalrow">
+<span>Discount</span>
+<strong id="checkoutDiscount">₹0.00</strong>
+</div>
+
+<div class="totalrow grand">
+<span>Estimated Total</span>
+<strong id="checkoutTotal">₹0.00</strong>
+</div>
+
+<p class="small">Final GST and order totals are calculated securely by the database.</p>
+
+</div>
+
+<div class="formactions">
+
+<button class="btn secondary" onclick="closeModal('checkoutModal')">Back</button>
+
+<button id="placeOrderBtn" class="btn primary" onclick="placeOrder()">Place Order</button>
+
+</div>
+
+</div>
+</div>
+
+<div id="successModal" class="modal">
+
+<div class="modalbox">
+
+<div class="successbox">
+
+<div class="success-icon">✓</div>
+
+<h2>Order Placed Successfully</h2>
+
+<div id="successOrderNumber" class="order-success-number"></div>
+
+<p>Your order has been received by Saad Traders.</p>
+
+<button class="btn primary" onclick="closeSuccess()">Continue Shopping</button>
+
+</div>
+
+</div>
+</div>
+
+<div id="ordersModal" class="modal">
+
+<div class="modalbox">
+
+<div class="modalhead">
+<h2>My Orders</h2>
+<button class="close" onclick="closeModal('ordersModal')">×</button>
+</div>
+
+<div id="ordersList">
+<div class="loading">Loading orders...</div>
+</div>
+
+</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+const SUPABASE_URL="https://bzyonildigzsytuprfrh.supabase.co";
+
+const SUPABASE_KEY="sb_publishable_bHzySPhRmTgA_2gaSdeaNw_KdMq-hBL";
+
+const supabaseClient=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY,
+{
+auth:{
+persistSession:true,
+autoRefreshToken:true,
+detectSessionInUrl:true
+}
+}
+);
+
+const CUSTOMER_SITE_URL="https://insta0123saad-collab.github.io/saad-traders-shop/";
+
+let products=[];
+let categories=[];
+let brands=[];
+let cart=[];
+let currentCategory="";
+let currentUser=null;
+let profile=null;
+let toastTimer=null;
+
+document.addEventListener("DOMContentLoaded",async()=>{
+
+loadCart();
+
+document.getElementById("search").addEventListener("input",renderProducts);
+
+document.getElementById("freightCharge").addEventListener("input",updateCheckoutTotals);
+document.getElementById("otherCharge").addEventListener("input",updateCheckoutTotals);
+document.getElementById("discount").addEventListener("input",updateCheckoutTotals);
+
+const {data:{session}}=await supabaseClient.auth.getSession();
+
+if(session){
+currentUser=session.user;
+await loadProfile();
+}
+
+updateAccountButton();
+
+supabaseClient.auth.onAuthStateChange(async(event,session)=>{
+
+if(session){
+currentUser=session.user;
+await loadProfile();
+}else{
+currentUser=null;
+profile=null;
+updateAccountButton();
+}
+
+updateAccountUI();
+
+});
+
+await loadCatalog();
+
+});
+
+async function loadCatalog(){
+
+try{
+
+const [
+productsResult,
+categoriesResult,
+brandsResult
+]=await Promise.all([
+
+supabaseClient
+.from("products")
+.select("*")
+.eq("is_active",true)
+.order("created_at",{ascending:false}),
+
+supabaseClient
+.from("categories")
+.select("*")
+.eq("is_active",true)
+.order("sort_order",{ascending:true})
+.order("name",{ascending:true}),
+
+supabaseClient
+.from("brands")
+.select("*")
+.eq("is_active",true)
+.order("name",{ascending:true})
+
+]);
+
+if(productsResult.error)throw productsResult.error;
+if(categoriesResult.error)throw categoriesResult.error;
+if(brandsResult.error)throw brandsResult.error;
+
+products=productsResult.data||[];
+categories=categoriesResult.data||[];
+brands=brandsResult.data||[];
+
+renderCategories();
+renderBrandFilter();
+renderProducts();
+
+}catch(e){
+
+console.error(e);
+
+document.getElementById("products").innerHTML=
+`<div class="empty" style="grid-column:1/-1">
+Unable to load products.<br>
+<small>${esc(e.message)}</small>
+</div>`;
+
+toast("Unable to load store data.","error");
+
+}
+
+}
+
+function renderCategories(){
+
+const box=document.getElementById("categories");
+
+let html=`
+<button class="category ${currentCategory===""?"active":""}" onclick="selectCategory('')">
+<div class="category-placeholder">🛍️</div>
+All Products
+</button>
+`;
+
+html+=categories.map(c=>{
+
+const image=categoryImage(c);
+
+return `
+<button class="category ${currentCategory===c.id?"active":""}" onclick="selectCategory('${esc(c.id)}')">
+
+${image
+?`<img class="category-img" src="${esc(image)}" alt="${esc(c.name)}" onerror="this.style.display='none'">`
+:`<div class="category-placeholder">📦</div>`
+}
+
+${esc(c.name)}
+
+</button>
+`;
+
+}).join("");
+
+box.innerHTML=html;
+
+}
+
+function selectCategory(id){
+
+currentCategory=id;
+
+renderCategories();
+renderProducts();
+
+const c=categories.find(x=>x.id===id);
+
+document.getElementById("productsTitle").textContent=c?c.name:"All Products";
+
+}
+
+function renderBrandFilter(){
+
+const select=document.getElementById("brandFilter");
+
+select.innerHTML=
+`<option value="">All Brands</option>`+
+brands.map(b=>
+`<option value="${esc(b.id)}">${esc(b.name)}</option>`
+).join("");
+
+}
+
+function renderProducts(){
+
+const box=document.getElementById("products");
+
+const search=document.getElementById("search").value.toLowerCase().trim();
+
+const brandId=document.getElementById("brandFilter").value;
+
+const list=products.filter(p=>{
+
+if(currentCategory&&p.category_id!==currentCategory)return false;
+
+if(brandId&&p.brand_id!==brandId)return false;
+
+const brand=brands.find(b=>b.id===p.brand_id)?.name||"";
+const category=categories.find(c=>c.id===p.category_id)?.name||"";
+
+return[
+p.name,
+p.sku,
+p.size,
+p.description,
+brand,
+category
+].join(" ").toLowerCase().includes(search);
+
+});
+
+if(!list.length){
+
+box.innerHTML=
+`<div class="empty" style="grid-column:1/-1">No products found.</div>`;
+
+return;
+
+}
+
+box.innerHTML=list.map(productCard).join("");
+
+}
+
+function productCard(p){
+
+const stock=Number(p.stock||0);
+
+const brand=brands.find(b=>b.id===p.brand_id)?.name||"";
+
+let stockClass="instock";
+let stockText="In stock";
+
+if(stock<=0){
+stockClass="outstock";
+stockText="Out of stock";
+}else if(stock<=5){
+stockClass="lowstock";
+stockText=`Only ${formatNumber(stock)} left`;
+}
+
+const image=productImage(p);
+
+return `
+<article class="product">
+
+<div class="product-image">
+
+${image
+?`<img src="${esc(image)}" alt="${esc(p.name)}" loading="lazy" onerror="this.style.display='none'">`
+:`<div class="noimage">No Image</div>`
+}
+
+<span class="stock-tag ${stockClass}">${stockText}</span>
+
+</div>
+
+<div class="product-body">
+
+<div class="product-name">${esc(p.name)}</div>
+
+<div class="product-meta">
+${esc(brand)}
+${brand&&p.size?" • ":""}
+${esc(p.size||"")}
+</div>
+
+${p.sku
+?`<div class="product-meta">SKU: ${esc(p.sku)}</div>`
+:""
+}
+
+<div class="price-row">
+
+<span class="price">₹${money(p.selling_price)}</span>
+
+${Number(p.mrp)>Number(p.selling_price)
+?`<span class="mrp">₹${money(p.mrp)}</span>`
+:""
+}
+
+</div>
+
+<button class="addbtn ${stock<=0?"out":""}"
+${stock<=0?"disabled":""}
+onclick="addToCart('${esc(p.id)}')">
+
+${stock<=0?"Out of Stock":"Add to Cart"}
+
+</button>
+
+</div>
+</article>
+`;
+
+}
+
+function productImage(p){
+
+if(p.image_url)return p.image_url;
+if(p.image_path)return storageUrl(p.image_path);
+
+return null;
+
+}
+
+function categoryImage(c){
+
+if(c.image_url)return c.image_url;
+if(c.image_path)return storageUrl(c.image_path);
+
+return null;
+
+}
+
+function storageUrl(path){
+
+if(!path)return null;
+
+const {data}=supabaseClient.storage.from("product-images").getPublicUrl(path);
+
+return data?.publicUrl||null;
+
+}
+
+function loadCart(){
+
+try{
+
+cart=JSON.parse(localStorage.getItem("saad_traders_cart")||"[]");
+
+if(!Array.isArray(cart))cart=[];
+
+}catch{
+cart=[];
+}
+
+updateCartUI();
+
+}
+
+function saveCart(){
+
+localStorage.setItem("saad_traders_cart",JSON.stringify(cart));
+
+updateCartUI();
+
+}
+
+function addToCart(id){
+
+const p=products.find(x=>x.id===id);
+
+if(!p)return;
+
+const stock=Number(p.stock||0);
+
+if(stock<=0){
+toast("This product is out of stock.","error");
+return;
+}
+
+const existing=cart.find(x=>x.product_id===id);
+
+if(existing){
+
+if(Number(existing.quantity)+1>stock){
+
+toast(`Only ${formatNumber(stock)} available.`,"error");
+return;
+
+}
+
+existing.quantity=Number(existing.quantity)+1;
+
+}else{
+
+cart.push({
+product_id:p.id,
+quantity:1
+});
+
+}
+
+saveCart();
+
+toast("Added to cart.","success");
+
+openCart();
+
+}
+
+function changeQty(id,delta){
+
+const item=cart.find(x=>x.product_id===id);
+const p=products.find(x=>x.id===id);
+
+if(!item||!p)return;
+
+const stock=Number(p.stock||0);
+const newQty=Number(item.quantity)+delta;
+
+if(newQty<=0){
+
+cart=cart.filter(x=>x.product_id!==id);
+
+}else if(newQty>stock){
+
+toast(`Only ${formatNumber(stock)} available.`,"error");
+return;
+
+}else{
+
+item.quantity=newQty;
+
+}
+
+saveCart();
+renderCart();
+
+}
+
+function removeFromCart(id){
+
+cart=cart.filter(x=>x.product_id!==id);
+
+saveCart();
+renderCart();
+
+}
+
+function cartDetails(){
+
+return cart.map(item=>{
+
+const p=products.find(x=>x.id===item.product_id);
+
+if(!p)return null;
+
+return{
+item,
+product:p,
+quantity:Number(item.quantity)||0
+};
+
+}).filter(x=>x&&x.quantity>0);
+
+}
+
+function cartSubtotal(){
+
+return cartDetails().reduce(
+(sum,x)=>sum+Number(x.product.selling_price||0)*x.quantity,
+0
+);
+
+}
+
+function updateCartUI(){
+
+const count=cart.reduce(
+(sum,x)=>sum+Number(x.quantity||0),
+0
+);
+
+document.getElementById("cartCount").textContent=count;
+document.getElementById("cartItemsCount").textContent=count;
+
+const subtotal=cartSubtotal();
+
+document.getElementById("cartSubtotal").textContent="₹"+money(subtotal);
+document.getElementById("cartGrand").textContent="₹"+money(subtotal);
+
+}
+
+function renderCart(){
+
+const box=document.getElementById("cartItems");
+const details=cartDetails();
+
+if(!details.length){
+
+box.innerHTML=`<div class="empty">Your cart is empty.</div>`;
+
+updateCartUI();
+
+return;
+
+}
+
+box.innerHTML=details.map(x=>{
+
+const p=x.product;
+const image=productImage(p);
+
+return `
+<div class="cart-item">
+
+${image
+?`<img class="cart-img" src="${esc(image)}" alt="${esc(p.name)}">`
+:`<div class="cart-img" style="display:flex;align-items:center;justify-content:center">📦</div>`
+}
+
+<div class="cart-info">
+
+<div class="cart-name">${esc(p.name)}</div>
+
+<div class="small">${esc(p.size||"")}</div>
+
+<div class="cart-price">₹${money(p.selling_price)}</div>
+
+<div class="qty">
+
+<button onclick="changeQty('${esc(p.id)}',-1)">−</button>
+
+<strong>${formatNumber(x.quantity)}</strong>
+
+<button onclick="changeQty('${esc(p.id)}',1)">+</button>
+
+<button class="remove" onclick="removeFromCart('${esc(p.id)}')">Remove</button>
+
+</div>
+
+</div>
+</div>
+`;
+
+}).join("");
+
+updateCartUI();
+
+}
+
+function openCart(){
+
+document.getElementById("overlay").classList.add("show");
+document.getElementById("cartDrawer").classList.add("show");
+
+renderCart();
+
+}
+
+function closeCart(){
+
+document.getElementById("overlay").classList.remove("show");
+document.getElementById("cartDrawer").classList.remove("show");
+
+}
+
+async function loadProfile(){
+
+if(!currentUser){
+
+profile=null;
+updateAccountButton();
+return;
+
+}
+
+const {data,error}=await supabaseClient
+.from("profiles")
+.select("*")
+.eq("id",currentUser.id)
+.maybeSingle();
+
+if(error)console.error(error);
+
+profile=data||null;
+
+updateAccountButton();
+
+}
+
+function updateAccountButton(){
+
+const btn=document.getElementById("accountBtn");
+
+btn.textContent=currentUser?"My Account":"Account";
+
+}
+
+function openAccount(){
+
+document.getElementById("accountModal").classList.add("show");
+
+updateAccountUI();
+
+}
+
+function updateAccountUI(){
+
+const out=document.getElementById("loggedOutAccount");
+const inside=document.getElementById("loggedInAccount");
+
+if(currentUser){
+
+out.style.display="none";
+inside.classList.add("show");
+
+document.getElementById("profileName").textContent=
+profile?.full_name||currentUser.email||"Customer";
+
+document.getElementById("profileEmail").textContent=
+currentUser.email||"";
+
+document.getElementById("profilePhone").textContent=
+profile?.phone||"";
+
+}else{
+
+out.style.display="block";
+inside.classList.remove("show");
+
+}
+
+}
+
+function switchAuth(type){
+
+const login=type==="login";
+
+document.getElementById("loginForm").style.display=login?"block":"none";
+document.getElementById("signupForm").style.display=login?"none":"block";
+
+document.getElementById("loginTab").classList.toggle("active",login);
+document.getElementById("signupTab").classList.toggle("active",!login);
+
+document.getElementById("authMessage").textContent="";
+
+}
+
+async function customerLogin(){
+
+const email=document.getElementById("loginEmail").value.trim();
+const password=document.getElementById("loginPassword").value;
+const msg=document.getElementById("authMessage");
+
+msg.style.color="#d63031";
+msg.textContent="";
+
+if(!email||!password){
+
+msg.textContent="Enter email and password.";
+return;
+
+}
+
+try{
+
+const {data,error}=await supabaseClient.auth.signInWithPassword({
+email,
+password
+});
+
+if(error)throw error;
+
+currentUser=data.user;
+
+await loadProfile();
+
+updateAccountUI();
+
+toast("Login successful.","success");
+
+}catch(e){
+
+console.error(e);
+
+msg.textContent=e.message||"Login failed.";
+
+}
+
+}
+
+async function customerSignup(){
+
+const name=document.getElementById("signupName").value.trim();
+const phone=document.getElementById("signupPhone").value.trim();
+const email=document.getElementById("signupEmail").value.trim();
+const password=document.getElementById("signupPassword").value;
+const confirm=document.getElementById("signupConfirm").value;
+
+const msg=document.getElementById("authMessage");
+const btn=document.getElementById("signupBtn");
+
+msg.style.color="#d63031";
+msg.textContent="";
+
+if(!name||!phone||!email||!password){
+
+msg.textContent="Please complete all required fields.";
+return;
+
+}
+
+if(password.length<6){
+
+msg.textContent="Password must contain at least 6 characters.";
+return;
+
+}
+
+if(password!==confirm){
+
+msg.textContent="Passwords do not match.";
+return;
+
+}
+
+const phoneDigits=phone.replace(/\D/g,"");
+
+if(phoneDigits.length<10){
+
+msg.textContent="Enter a valid phone number.";
+return;
+
+}
+
+btn.disabled=true;
+btn.textContent="Creating Account...";
+
+try{
+
+/*
+ IMPORTANT:
+ This is the real GitHub Pages address.
+ It prevents Supabase email confirmation
+ from returning the customer to localhost.
+*/
+const redirectUrl=CUSTOMER_SITE_URL;
+
+const {data,error}=await supabaseClient.auth.signUp({
+
+email:email,
+password:password,
+
+options:{
+emailRedirectTo:redirectUrl,
+
+data:{
+full_name:name,
+phone:phone
+}
+
+}
+
+});
+
+if(error)throw error;
+
+if(data.user){
+
+/*
+ If confirmation is disabled, a session is
+ immediately returned and the profile can
+ be created here.
+*/
+if(data.session){
+
+currentUser=data.user;
+
+const {error:profileError}=await supabaseClient
+.from("profiles")
+.upsert({
+id:data.user.id,
+full_name:name,
+phone:phone,
+email:email,
+role:"customer"
+},{
+onConflict:"id"
+});
+
+if(profileError)console.warn(profileError);
+
+await loadProfile();
+
+updateAccountUI();
+
+toast("Account created successfully.","success");
+
+}else{
+
+/*
+ Email confirmation is enabled.
+ Do NOT attempt to create a profile from
+ the browser here if your database trigger
+ already creates it.
+*/
+msg.style.color="#087f5b";
+
+msg.textContent=
+"Account created. Please check your email and click the confirmation link. You will be returned to Saad Traders.";
+
+}
+
+}else{
+
+throw new Error("Supabase did not return a user.");
+
+}
+
+}catch(e){
+
+console.error(e);
+
+msg.style.color="#d63031";
+msg.textContent=e.message||"Signup failed.";
+
+}finally{
+
+btn.disabled=false;
+btn.textContent="Create Account";
+
+}
+
+}
+
+async function customerLogout(){
+
+await supabaseClient.auth.signOut();
+
+currentUser=null;
+profile=null;
+
+updateAccountUI();
+
+closeModal("accountModal");
+
+toast("Logged out.","success");
+
+}
+
+async function startCheckout(){
+
+closeCart();
+
+const details=cartDetails();
+
+if(!details.length){
+
+toast("Your cart is empty.","error");
+return;
+
+}
+
+if(!currentUser){
+
+openAccount();
+switchAuth("login");
+
+toast(
+"Please login or create an account before checkout.",
+"error"
+);
+
+return;
+
+}
+
+const ids=details.map(x=>x.product.id);
+
+const {data,error}=await supabaseClient
+.from("products")
+.select("id,name,stock,is_active,selling_price")
+.in("id",ids);
+
+if(error){
+
+toast(error.message,"error");
+return;
+
+}
+
+const freshMap=new Map((data||[]).map(x=>[x.id,x]));
+
+for(const x of details){
+
+const fresh=freshMap.get(x.product.id);
+
+if(!fresh||!fresh.is_active||Number(fresh.stock||0)<x.quantity){
+
+toast(
+`${x.product.name} is no longer available in the requested quantity.`,
+"error"
+);
+
+await loadCatalog();
+return;
+
+}
+
+}
+
+fillCheckoutProfile();
+updateCheckoutTotals();
+
+document.getElementById("checkoutModal").classList.add("show");
+
+}
+
+function fillCheckoutProfile(){
+
+if(profile?.full_name)
+document.getElementById("customerName").value=profile.full_name;
+
+if(profile?.phone)
+document.getElementById("customerPhone").value=profile.phone;
+
+}
+
+function updateCheckoutTotals(){
+
+const subtotal=cartSubtotal();
+
+const freight=positiveNumber(document.getElementById("freightCharge")?.value);
+const other=positiveNumber(document.getElementById("otherCharge")?.value);
+const discount=positiveNumber(document.getElementById("discount")?.value);
+
+const total=Math.max(0,subtotal+freight+other-discount);
+
+setText("checkoutSubtotal","₹"+money(subtotal));
+setText("checkoutFreight","₹"+money(freight));
+setText("checkoutOther","₹"+money(other));
+setText("checkoutDiscount","₹"+money(discount));
+setText("checkoutTotal","₹"+money(total));
+
+}
+
+async function placeOrder(){
+
+const btn=document.getElementById("placeOrderBtn");
+
+if(!currentUser){
+
+toast("Please login before placing an order.","error");
+return;
+
+}
+
+const details=cartDetails();
+
+if(!details.length){
+
+toast("Your cart is empty.","error");
+return;
+
+}
+
+const customerName=document.getElementById("customerName").value.trim();
+const customerPhone=document.getElementById("customerPhone").value.trim();
+const address=document.getElementById("deliveryAddress").value.trim();
+const city=document.getElementById("deliveryCity").value.trim();
+const state=document.getElementById("deliveryState").value.trim();
+const pincode=document.getElementById("deliveryPincode").value.trim();
+const gstin=document.getElementById("customerGstin").value.trim();
+const notes=document.getElementById("orderNotes").value.trim();
+
+const freight=positiveNumber(document.getElementById("freightCharge").value);
+const other=positiveNumber(document.getElementById("otherCharge").value);
+const discount=positiveNumber(document.getElementById("discount").value);
+
+if(!customerName){
+
+toast("Enter your name.","error");
+return;
+
+}
+
+if(!customerPhone){
+
+toast("Enter your phone number.","error");
+return;
+
+}
+
+if(!address){
+
+toast("Enter delivery address.","error");
+return;
+
+}
+
+if(customerPhone.replace(/\D/g,"").length<10){
+
+toast("Enter a valid phone number.","error");
+return;
+
+}
+
+btn.disabled=true;
+btn.textContent="Placing Order...";
+
+try{
+
+const items=details.map(x=>({
+product_id:x.product.id,
+quantity:x.quantity
+}));
+
+const {data,error}=await supabaseClient.rpc(
+"create_customer_order",
+{
+p_customer_name:customerName,
+p_customer_phone:customerPhone,
+p_delivery_address:address,
+p_delivery_city:city||null,
+p_delivery_state:state||null,
+p_delivery_pincode:pincode||null,
+p_customer_gstin:gstin||null,
+p_notes:notes||null,
+p_freight_charge:freight,
+p_other_charge:other,
+p_discount:discount,
+p_items:items
+}
+);
+
+if(error)throw error;
+
+const result=Array.isArray(data)?data[0]:data;
+
+if(!result||!result.order_id){
+
+throw new Error("Order was not confirmed by the database.");
+
+}
+
+cart=[];
+saveCart();
+
+closeModal("checkoutModal");
+
+document.getElementById("successOrderNumber").textContent=
+"Order #"+result.order_number;
+
+document.getElementById("successModal").classList.add("show");
+
+await loadCatalog();
+
+}catch(e){
+
+console.error(e);
+
+let message=e.message||"Unable to place order.";
+
+if(message.toLowerCase().includes("stock")){
+
+message=
+"Some product stock changed while you were checking out. Please review your cart and try again.";
+
+}
+
+toast(message,"error");
+
+}finally{
+
+btn.disabled=false;
+btn.textContent="Place Order";
+
+}
+
+}
+
+async function openOrders(){
+
+closeModal("accountModal");
+
+if(!currentUser){
+
+openAccount();
+return;
+
+}
+
+document.getElementById("ordersModal").classList.add("show");
+
+await loadCustomerOrders();
+
+}
+
+async function loadCustomerOrders(){
+
+const box=document.getElementById("ordersList");
+
+box.innerHTML=`<div class="loading">Loading your orders...</div>`;
+
+const {data,error}=await supabaseClient
+.from("orders")
+.select("*")
+.eq("customer_id",currentUser.id)
+.order("created_at",{ascending:false});
+
+if(error){
+
+box.innerHTML=
+`<div class="empty">${esc(error.message)}</div>`;
+
+return;
+
+}
+
+const orderList=data||[];
+
+if(!orderList.length){
+
+box.innerHTML=
+`<div class="empty">You have not placed any orders yet.</div>`;
+
+return;
+
+}
+
+const orderIds=orderList.map(x=>x.id);
+
+const {data:itemData,error:itemError}=await supabaseClient
+.from("order_items")
+.select("*")
+.in("order_id",orderIds);
+
+if(itemError)console.error(itemError);
+
+const items=itemData||[];
+
+box.innerHTML=orderList.map(o=>{
+
+const orderItems=items.filter(x=>x.order_id===o.id);
+
+return `
+<div class="order-card">
+
+<div class="order-top">
+
+<div>
+
+<div class="order-number">
+Order #${esc(o.order_number)}
+</div>
+
+<div class="small">
+${date(o.created_at)}
+</div>
+
+</div>
+
+<span class="status">
+${esc(o.order_status||"pending")}
+</span>
+
+</div>
+
+<div class="order-items-mini">
+
+${orderItems.length
+?orderItems.map(i=>
+`${esc(i.product_name)} × ${formatNumber(i.quantity)} — ₹${money(i.line_total)}`
+).join("<br>")
+:"Order items unavailable"
+}
+
+</div>
+
+<div class="order-total">
+Total: ₹${money(o.grand_total)}
+</div>
+
+<div class="small">
+Payment: ${esc(o.payment_status||"pending")}
+</div>
+
+</div>
+`;
+
+}).join("");
+
+}
+
+function closeSuccess(){
+
+closeModal("successModal");
+
+}
+
+function closeModal(id){
+
+document.getElementById(id).classList.remove("show");
+
+}
+
+document.querySelectorAll(".modal").forEach(modal=>{
+
+modal.addEventListener("click",event=>{
+
+if(event.target===modal)
+modal.classList.remove("show");
+
+});
+
+});
+
+function money(value){
+
+return Number(value||0).toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+});
+
+}
+
+function formatNumber(value){
+
+const n=Number(value||0);
+
+return Number.isInteger(n)
+?String(n)
+:n.toLocaleString("en-IN",{maximumFractionDigits:3});
+
+}
+
+function positiveNumber(value){
+
+const n=Number(value);
+
+if(!Number.isFinite(n)||n<0)return 0;
+
+return n;
+
+}
+
+function date(value){
+
+if(!value)return"-";
+
+const d=new Date(value);
+
+return d.toLocaleString("en-IN",{
+day:"2-digit",
+month:"short",
+year:"numeric",
+hour:"2-digit",
+minute:"2-digit"
+});
+
+}
+
+function setText(id,value){
+
+const el=document.getElementById(id);
+
+if(el)el.textContent=value;
+
+}
+
+function esc(value){
+
+return String(value??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+function toast(message,type=""){
+
+const box=document.getElementById("toast");
+
+box.textContent=message;
+box.className="toast show "+type;
+
+clearTimeout(toastTimer);
+
+toastTimer=setTimeout(()=>{
+box.className="toast";
+},4000);
+
+}
+
+document.addEventListener("keydown",event=>{
+
+if(event.key==="Escape"){
+
+closeCart();
+
+document.querySelectorAll(".modal")
+.forEach(x=>x.classList.remove("show"));
+
+}
+
+});
+
+function cleanInvalidCart(){
+
+let changed=false;
+
+cart=cart.filter(item=>{
+
+const p=products.find(x=>x.id===item.product_id);
+
+if(!p||!p.is_active){
+
+changed=true;
+return false;
+
+}
+
+const stock=Number(p.stock||0);
+
+if(stock<=0){
+
+changed=true;
+return false;
+
+}
+
+if(Number(item.quantity)>stock){
+
+item.quantity=stock;
+changed=true;
+
+}
+
+return true;
+
+});
+
+if(changed)saveCart();
+
+}
+
+const originalLoadCatalog=loadCatalog;
+
+loadCatalog=async function(){
+
+await originalLoadCatalog();
+
+cleanInvalidCart();
+renderCart();
+
+};
+
+updateCartUI();
+updateAccountButton();
+
+</script>
+
+</body>
+</html>
